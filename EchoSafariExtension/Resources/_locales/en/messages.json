@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "Echo Inspector",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "Visual web inspector with on-device AI analysis and voice-driven guidance.",
+        "description": "Description of what the extension does."
+    }
+}
