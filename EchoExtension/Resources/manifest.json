@@ -1,0 +1,48 @@
+{
+    "manifest_version": 3,
+    "name": "Echo Inspector",
+    "version": "1.0",
+    "description": "Visual web inspector with on-device AI analysis and voice-driven guidance",
+
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Echo Inspector",
+        "default_icon": {
+            "16":  "images/icon-16.png",
+            "48":  "images/icon-48.png",
+            "128": "images/icon-128.png"
+        }
+    },
+
+    "content_scripts": [
+        {
+            "js":      ["content.js"],
+            "css":     ["inspector.css"],
+            "matches": ["<all_urls>"],
+            "run_at":  "document_idle",
+            "all_frames": false
+        }
+    ],
+
+    "permissions": [
+        "activeTab",
+        "storage",
+        "nativeMessaging"
+    ],
+
+    "host_permissions": [
+        "<all_urls>"
+    ],
+
+    "web_accessible_resources": [
+        {
+            "resources": ["images/*"],
+            "matches":   ["<all_urls>"]
+        }
+    ]
+}

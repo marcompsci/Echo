@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Echo</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --indigo: #6366f1;
+            --purple: #8b5cf6;
+            --surface: #0f0f18;
+            --surface2: #16161f;
+            --border: #24243a;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --dim: #334155;
+        }
+
+        body {
+            width: 320px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, var(--indigo), var(--purple));
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .header-title { font-size: 17px; font-weight: 700; color: #fff; }
+        .header-sub   { font-size: 11px; color: rgba(255,255,255,.65); }
+
+        /* ── Status bar ── */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+        }
+        .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #ef4444;
+            flex-shrink: 0;
+        }
+        .dot.on { background: #22c55e; }
+
+        /* ── Content ── */
+        .content { padding: 14px; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background .12s, color .12s;
+        }
+        .btn-primary  { background: var(--indigo); color: #fff; margin-bottom: 8px; }
+        .btn-primary:hover { background: #5254cc; }
+        .btn-primary.active { background: #ef4444; }
+        .btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .btn-row .btn { flex: 1; margin: 0; }
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: #1e1e2e; color: var(--text); }
+        .btn-ghost.active { background: #1a1025; color: var(--purple); border-color: var(--purple); }
+
+        /* ── Section label ── */
+        .label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin: 12px 0 6px;
+        }
+
+        /* ── Element preview ── */
+        .element-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .element-tag { color: var(--indigo); font-family: 'SF Mono', monospace; font-weight: 700; }
+        .element-sub { color: var(--muted); font-size: 11px; margin-top: 3px; }
+
+        /* ── Suggestion / insight rows ── */
+        .row-suggest {
+            border-left: 3px solid #f59e0b;
+            background: #1a1410;
+            border-radius: 0 8px 8px 0;
+            padding: 7px 10px;
+            font-size: 11px;
+            color: #fde68a;
+            margin-bottom: 5px;
+        }
+        .row-insight {
+            border-left: 3px solid var(--indigo);
+            background: #10101a;
+            border-radius: 0 8px 8px 0;
+            padding: 7px 10px;
+            font-size: 11px;
+            color: #c7d2fe;
+            margin-bottom: 5px;
+        }
+
+        /* ── Empty state ── */
+        .empty {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 18px 8px;
+        }
+        .empty svg { opacity: .3; margin-bottom: 8px; }
+
+        #analysis { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-icon">◈</div>
+    <div>
+        <div class="header-title">Echo</div>
+        <div class="header-sub">Inspector + Voice Guide</div>
+    </div>
+</div>
+
+<div class="status">
+    <div class="dot" id="statusDot"></div>
+    <span id="statusText">Checking connection…</span>
+</div>
+
+<div class="content">
+
+    <button class="btn btn-primary" id="inspectBtn" onclick="toggleInspect()">
+        ◈ &nbsp;Start Inspecting
+    </button>
+
+    <div class="btn-row">
+        <button class="btn btn-ghost" id="voiceBtn" onclick="toggleVoice()">🎙 Guide</button>
+        <button class="btn btn-ghost" onclick="openApp()">Open App</button>
+    </div>
+
+    <!-- Last element -->
+    <div id="analysis">
+        <div class="label">Last Inspected</div>
+        <div class="element-card">
+            <div class="element-tag" id="elemTag"></div>
+            <div class="element-sub" id="elemSub"></div>
+        </div>
+        <div id="suggestions"></div>
+        <div id="insights"></div>
+    </div>
+
+    <div class="empty" id="emptyState">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
+            <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
+        </svg>
+        <div>Enable inspect mode, then click any element</div>
+    </div>
+
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
