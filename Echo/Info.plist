@@ -2,34 +2,45 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Voice button in AnalyzeView and AgentView -->
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Echo uses the microphone to listen for voice commands so you can control element inspection hands-free.</string>
+	<string>Echo uses your microphone only when you hold the voice button to ask a question or give a command.</string>
+
+	<!-- Converts held-button audio into text -->
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Echo uses speech recognition to understand voice commands for hands-free element inspection and guidance.</string>
+	<string>Echo converts your spoken question or command into text so it can create your guide or run your task.</string>
+
+	<!-- Agent: read and manage contacts when you ask Echo to -->
+	<key>NSContactsUsageDescription</key>
+	<string>Echo reads and manages your contacts only when you explicitly ask it to — for example, to delete duplicates or find someone. Echo always shows you a full plan and asks for confirmation before making any changes.</string>
+
+	<!-- Agent: read and delete photos when you ask Echo to -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Echo accesses your photo library only when you ask it to — for example, to find large videos or clear old screenshots. Echo shows you exactly what it will remove before doing anything.</string>
+
+	<!-- Agent: add photos when saving annotated guide images -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Echo can save annotated guide images to your photo library when you request it.</string>
+
+	<!-- Agent: create and manage reminders when you ask Echo to -->
+	<key>NSRemindersUsageDescription</key>
+	<string>Echo creates or manages reminders only when you ask it to. You review every action before it runs.</string>
+
+	<!-- Agent: create and read calendar events when you ask Echo to -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>Echo creates or reads calendar events only when you ask it to. You review every action before it runs.</string>
+
+	<!-- URL scheme: used by future Share Extension (echo://import) and Agent deep links -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.echo.deeplink</string>
+			<string>com.echo.import</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>echo</string>
 			</array>
 		</dict>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-		<string>bluetooth-peripheral</string>
-		<string>audio</string>
-		<string>fetch</string>
-		<string>processing</string>
-		<string>external-accessory</string>
-		<string>location</string>
-		<string>push-to-talk</string>
-		<string>bluetooth-central</string>
-		<string>nearby-interaction</string>
-		<string>voip</string>
 	</array>
 </dict>
 </plist>

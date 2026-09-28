@@ -1,155 +1,138 @@
-# Echo ◈
+# Echo — AI Visual Guide (MVP)
 
-**Echo** is an iOS/macOS app paired with a Safari Web Extension that combines visual element debugging with voice-driven, screen-aware guidance — all powered by on-device Apple Intelligence frameworks.
+> See it clearly. Know what to do.
 
----
-
-## Overview
-
-Echo gives developers and power users two superpowers in Safari:
-
-1. **Visual Element Inspector** — Click any element on any webpage to extract its HTML, computed CSS, XPath, and attributes. Powered by a Safari Web Extension that injects a non-intrusive overlay into the page.
-2. **Voice-Driven Guidance** — Speak commands to receive real-time spoken analysis of selected elements. Echo narrates accessibility issues, naming convention problems, and improvement suggestions hands-free.
-
-All analysis runs entirely on-device using Apple's Natural Language framework — no external API calls, no data leaves your device.
+Echo is a privacy-first iOS app that helps people understand what they are looking at on their phone. A user intentionally imports or shares a screenshot or photo, asks Echo a question by typing or holding a voice button, and receives a concise explanation with numbered visual annotations and practical next steps.
 
 ---
 
-## Features
+## Requirements
 
-| Feature | Description |
-|---|---|
-| ◈ Element Picker | Hover to highlight, click to inspect any DOM element |
-| 🧠 On-Device NL Analysis | Accessibility checks, pattern detection, naming conventions via `NaturalLanguage` framework |
-| 🎙 Voice Guidance | Speak commands (`analyze`, `fix`, `explain`, `suggest`) — Echo responds with AVSpeechSynthesizer |
-| 📋 Inspection History | All sessions and snapshots persisted with SwiftData |
-| 🔗 Live Bridge | Darwin notifications + App Group shared container connect the extension to the app in real time |
-| 🌐 Safari Extension | Works on every webpage, iOS and macOS, via a WebExtension Manifest V3 extension |
-| 🔌 Widget + iMessage | WidgetKit and iMessage extension targets included |
+| Tool | Version |
+|------|---------|
+| Xcode | 16+ |
+| iOS deployment target | 18.0 |
+| Swift | 6 |
+| SwiftData | iOS 17+ (bundled) |
+
+---
+
+## Setup & Run
+
+1. **Clone / open the project**
+   ```
+   open Echo.xcodeproj
+   ```
+
+2. **Sign the main target**
+   - Select the **Echo** target → Signing & Capabilities → choose your Team.
+   - The extension targets (Widget, iMessage, Safari) each need their own provisioning profile or can be deleted if unused in development.
+
+3. **Run on Simulator or device**
+   - Select the **Echo** scheme and an iOS 18 simulator or device.
+   - Press ⌘R.
+
+4. **First launch**
+   - A 3-page onboarding flow appears on first launch only.
+   - Completion is stored in `AppStorage("hasSeenOnboarding")`.
+   - To replay onboarding: delete the app from the simulator.
+
+5. **Mock mode**
+   - The app ships with `MockGuideService`, which returns deterministic sample data after ~1.8 s.
+   - No backend or API key is required to run the full feature flow.
 
 ---
 
 ## Architecture
 
 ```
-Safari page
-  └── content.js          ← element picker overlay, voice guidance banner
-        │
-  background.js           ← service worker, routes messages
-        │
-  SafariWebExtensionHandler.swift   ← native bridge (NSExtensionRequestHandling)
-        │
-  App Group UserDefaults + Darwin notifications
-        │
-  ExtensionBridgeService  ← receives element data in real time
-        │
-  NLAnalysisService       ← on-device NL framework analysis
-        │
-  VoiceGuidanceService    ← AVSpeechSynthesizer + SFSpeechRecognizer
-        │
-  SwiftUI Views           ← Inspector · Guide · History · Settings tabs
-```
-
----
-
-## Project Structure
-
-```
 Echo/
-├── Echo/                          # Main iOS/macOS SwiftUI app
-│   ├── Models/
-│   │   ├── DebugSession.swift     # SwiftData model for inspection sessions
-│   │   ├── ElementSnapshot.swift  # Captured element with AI analysis fields
-│   │   └── VoiceCommandRecord.swift
-│   ├── Services/
-│   │   ├── ExtensionBridgeService.swift   # Darwin notification bridge
-│   │   ├── NLAnalysisService.swift        # Natural Language framework analysis
-│   │   └── VoiceGuidanceService.swift     # Speech synthesis + recognition
-│   ├── Views/
-│   │   ├── InspectorView.swift    # Live element card + AI insight panels
-│   │   ├── VoiceGuidanceView.swift # Mic button, waveform, 4 guidance modes
-│   │   ├── ElementDetailView.swift # HTML / CSS / Attributes tabs
-│   │   ├── HistoryView.swift       # Past sessions + search
-│   │   └── SettingsView.swift      # Voice, analysis, and appearance config
-│   ├── EchoApp.swift
-│   └── ContentView.swift          # 4-tab root view
-│
-├── EchoSafariExtension/           # Safari Web Extension target
-│   ├── SafariWebExtensionHandler.swift
-│   └── Resources/
-│       ├── manifest.json          # WebExtension Manifest V3
-│       ├── content.js             # Element picker + overlay UI
-│       ├── background.js          # Service worker + native messaging
-│       ├── popup.html/js/css      # Toolbar popup
-│       └── _locales/en/messages.json
-│
-├── EchoWidgetExtension/           # WidgetKit widget
-└── EchoiMessageExtension/         # iMessage extension
+  App/             AppRouter (NavigationStack state)
+  DesignSystem/    Colors, Typography, Spacing constants
+  Models/          EchoSession (SwiftData), GuideResponse, Annotation, …
+  Services/        GuideService protocol, MockGuideService, APIClient scaffold, …
+  ViewModels/      @Observable @MainActor classes (Home, Analyze, Result, Settings)
+  Views/           Onboarding, Home, Analyze, Result, Settings, Components
+  Intents/         AskEchoIntent + EchoShortcuts (Siri / Shortcuts app)
 ```
 
----
-
-## Apple Frameworks Used
-
-| Framework | Usage |
-|---|---|
-| `NaturalLanguage` | On-device element classification, language detection, naming convention analysis, accessibility auditing |
-| `AVFoundation` | `AVSpeechSynthesizer` for text-to-speech guidance |
-| `Speech` | `SFSpeechRecognizer` + `AVAudioEngine` for voice command input |
-| `SafariServices` | `NSExtensionRequestHandling` native message bridge |
-| `SwiftData` | Persistent storage for sessions, snapshots, and voice command history |
-| `WidgetKit` | Home screen widget |
+- **MVVM** — ViewModels are `@Observable` `@MainActor` classes.
+- **SwiftData** — `EchoSession` stores question, summary, and (optionally) image data.
+- **Navigation** — single `NavigationStack` owned by `AppRouter`.
+- **Services** — injected via initializer; `MockGuideService` is the default.
 
 ---
 
-## Setup
+## Replacing MockGuideService
 
-### Requirements
-- Xcode 15+
-- iOS 16+ / macOS 13+
-- Apple Developer account (for Safari extension and App Group entitlements)
+The service boundary is the `GuideService` protocol:
 
-### Steps
+```swift
+protocol GuideService: Sendable {
+    func createGuide(imageData: Data, userQuestion: String) async throws -> GuideResponse
+}
+```
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/marcompsci/Echo.git
-   cd Echo
-   open Echo.xcodeproj
-   ```
+To activate a live backend:
 
-2. **Configure App Group** in Xcode for both the `Echo` and `EchoSafariExtension` targets:
-   - Target → Signing & Capabilities → `+` → App Groups → `group.com.echo.extension`
+1. Implement `LiveGuideService: GuideService` (scaffold in `APIClient.swift`).
+2. Inject it in `AnalyzeViewModel.init(guideService:)`.
+3. **Never embed provider API keys in the app.** All model-provider credentials must live on the server.
 
-3. **Enable the extension** on device or simulator:
-   - iOS: Settings → Safari → Extensions → Echo Inspector → Enable
-   - macOS: Safari → Settings → Extensions → Echo Inspector → Enable
+### Server requirements (before shipping)
 
-4. **Permissions** — The app will request microphone and speech recognition access on first launch (required for Voice Guide mode).
-
----
-
-## How It Works
-
-### Element Inspection
-1. Open Safari and tap the Echo toolbar button
-2. Tap **Start Inspecting** in the popup
-3. Hover over elements to see a live highlight and tooltip
-4. Click any element — data is sent to the native app via `browser.runtime.sendNativeMessage`
-5. `SafariWebExtensionHandler` writes the element to the shared App Group container and fires a Darwin notification
-6. `ExtensionBridgeService` receives the notification, runs `NLAnalysisService`, and updates the SwiftUI inspector tab
-7. The analysis is spoken aloud automatically if Auto-speak is enabled
-
-### Voice Commands
-Say any of the following while an element is selected:
-- **"analyze"** — full NL analysis of the selected element
-- **"suggest"** — list accessibility and quality suggestions
-- **"explain"** — what the element is and what it contains
-- **"fix"** — first suggestion read aloud
-- **"describe"** — full voice summary
+| Requirement | Notes |
+|-------------|-------|
+| Server-side auth | Issue short-lived tokens; rotate regularly |
+| Rate limiting | Per-user and global caps |
+| Content filtering | Server-side moderation before sending to AI model |
+| Encrypted transport | TLS 1.3 minimum |
+| Deletion controls | Honor user delete requests end-to-end |
+| Audit logging | Log request metadata; **never** log raw image content |
 
 ---
 
-## License
+## Required Info.plist keys
 
-MIT © Omari Bell / Phoronomics Studio
+| Key | Reason |
+|-----|--------|
+| `NSMicrophoneUsageDescription` | Push-to-talk voice button in AnalyzeView requests microphone only on first press |
+| `NSSpeechRecognitionUsageDescription` | SFSpeechRecognizer converts held-button audio to text |
+| `CFBundleURLTypes` (`echo://`) | Receives the `echo://import` URL from the future Share Extension |
+
+**PhotosPicker** uses the system-provided image picker, which does **not** require `NSPhotoLibraryUsageDescription` because the user picks photos through the system UI with no persistent library access granted to the app.
+
+---
+
+## Testing Siri Shortcuts
+
+1. Build and run on a **real device** (Shortcuts are not available in Simulator).
+2. Open the **Shortcuts** app → tap **+** → search "Echo".
+3. You should see **Ask Echo** in the action list.
+4. Add it and run it — Echo opens to the home screen.
+5. With Siri: say **"Ask Echo"**, **"Open Echo"**, or **"Get help from Echo"**.
+
+---
+
+## Running Unit Tests
+
+```
+⌘U  (or Product → Test)
+```
+
+Key test suites (in `EchoTests/`):
+
+| File | Coverage |
+|------|---------|
+| `GuideResponseTests.swift` | JSON decoding, round-trip, MockGuideService determinism |
+| `AnnotationRendererTests.swift` | Coordinate conversion, Codable enums, retention policy |
+
+---
+
+## Next Build Steps
+
+1. **Add the real backend** — implement `LiveGuideService`, configure server auth and rate limits.
+2. **Add the Share Extension** — follow `ShareExtensionSetup.md` to let users share images directly from any app.
+3. **Add authenticated accounts** — user identity, cloud guide sync, cross-device deletion.
+4. **Add usage limits and StoreKit subscription** — gate advanced features; respect App Store guidelines.
+5. **Conduct TestFlight usability testing before expanding automation** — observe real users before adding Siri automation or proactive suggestions.

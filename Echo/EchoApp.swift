@@ -3,15 +3,11 @@ import SwiftData
 
 @main
 struct EchoApp: App {
-    @StateObject private var bridge = ExtensionBridgeService.shared
-    @StateObject private var voice  = VoiceGuidanceService.shared
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @State private var router = AppRouter()
 
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            DebugSession.self,
-            ElementSnapshot.self,
-            VoiceCommandRecord.self,
-        ])
+        let schema = Schema([EchoSession.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
             return try ModelContainer(for: schema, configurations: [config])
@@ -22,10 +18,26 @@ struct EchoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(bridge)
-                .environmentObject(voice)
+            if hasSeenOnboarding {
+                HomeRootView()
+                    .environment(router)
+            } else {
+                OnboardingView(onComplete: { hasSeenOnboarding = true })
+            }
         }
         .modelContainer(sharedModelContainer)
+        .onOpenURL { url in
+            handleIncomingURL(url)
+        }
+    }
+
+    private func handleIncomingURL(_ url: URL) {
+        // echo://import — called by the future Share Extension
+        guard url.scheme?.lowercased() == "echo",
+              url.host?.lowercased() == "import" else { return }
+        let inbox = SharedImageInbox()
+        if let data = inbox.consumePendingImage() {
+            router.navigateToAnalyze(imageData: data)
+        }
     }
 }

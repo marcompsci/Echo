@@ -13,6 +13,8 @@
 		9D8C735C306607E60082FCFE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D8C735B306607E60082FCFE /* WidgetKit.framework */; };
 		9D8C735E306607E60082FCFE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D8C735D306607E60082FCFE /* SwiftUI.framework */; };
 		9D8C736D306607E70082FCFE /* EchoWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9D8C735A306607E60082FCFE /* EchoWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9D8C79F5306A0F800082FCFE /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9D8C79F4306A0F800082FCFE /* README.md */; };
+		9D8C79F7306A0F930082FCFE /* ShareExtensionSetup.md in Resources */ = {isa = PBXBuildFile; fileRef = 9D8C79F6306A0F930082FCFE /* ShareExtensionSetup.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +88,8 @@
 		9D8C735A306607E60082FCFE /* EchoWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EchoWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D8C735B306607E60082FCFE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9D8C735D306607E60082FCFE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		9D8C79F4306A0F800082FCFE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		9D8C79F6306A0F930082FCFE /* ShareExtensionSetup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ShareExtensionSetup.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -229,6 +233,8 @@
 				9D8C7343306607950082FCFE /* Frameworks */,
 				9D8C72CA3066025A0082FCFE /* Products */,
 				9D8C72FB306603D20082FCFE /* EchoExtension */,
+				9D8C79F4306A0F800082FCFE /* README.md */,
+				9D8C79F6306A0F930082FCFE /* ShareExtensionSetup.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -479,6 +485,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D8C79F5306A0F800082FCFE /* README.md in Resources */,
+				9D8C79F7306A0F930082FCFE /* ShareExtensionSetup.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

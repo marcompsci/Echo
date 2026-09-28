@@ -1,42 +1,44 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
-    @EnvironmentObject private var bridge: ExtensionBridgeService
-    @EnvironmentObject private var voice: VoiceGuidanceService
-    @State private var selectedTab: AppTab = .inspector
-
-    enum AppTab { case inspector, guide, history, settings }
+// HomeRootView wires the NavigationStack to AppRouter and resolves all route destinations.
+struct HomeRootView: View {
+    @Environment(AppRouter.self) private var router
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            InspectorView()
-                .tabItem { Label("Inspector", systemImage: "viewfinder.circle") }
-                .tag(AppTab.inspector)
-
-            VoiceGuidanceView()
-                .tabItem { Label("Guide", systemImage: "waveform.circle") }
-                .tag(AppTab.guide)
-
-            HistoryView()
-                .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
-                .tag(AppTab.history)
-
-            SettingsView()
-                .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(AppTab.settings)
+        @Bindable var router = router
+        NavigationStack(path: $router.path) {
+            HomeView()
+                .navigationDestination(for: EchoRoute.self) { route in
+                    switch route {
+                    case .analyze:
+                        if let imageData = router.pendingImageData {
+                            AnalyzeView(imageData: imageData)
+                        }
+                    case .result:
+                        if let session = router.currentSession,
+                           let response = router.currentGuideResponse {
+                            ResultView(
+                                session: session,
+                                response: response,
+                                imageData: router.pendingImageData
+                            )
+                        }
+                    case .agent:
+                        AgentView()
+                    }
+                }
         }
-        .tint(.indigo)
-        .onChange(of: bridge.lastSnapshot) { _, snap in
-            guard snap != nil else { return }
-            withAnimation { selectedTab = .inspector }
+        .sheet(isPresented: $router.showSettings) {
+            SettingsView()
+                .environment(\.modelContext, modelContext)
         }
     }
 }
 
 #Preview {
-    ContentView()
-        .environmentObject(ExtensionBridgeService.shared)
-        .environmentObject(VoiceGuidanceService.shared)
-        .modelContainer(for: [DebugSession.self, ElementSnapshot.self, VoiceCommandRecord.self], inMemory: true)
+    HomeRootView()
+        .environment(AppRouter())
+        .modelContainer(for: EchoSession.self, inMemory: true)
 }
