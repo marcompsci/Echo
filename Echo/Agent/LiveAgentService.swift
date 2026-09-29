@@ -8,10 +8,10 @@ struct LiveAgentService: AgentService {
     private let files     = FileAgent()
     private let reminders = ReminderAgent()
 
-    // Analyze is handled by the AI backend — this placeholder returns
-    // a mock until a real backend is wired in.
+    // On-device NLP via EchoAIProcessor (CoreML + NaturalLanguage + Vision).
+    // Replace with a backend call in LiveGuideService once an API is available.
     func analyze(request: AgentRequest) async throws -> AgentPlan {
-        try await MockAgentService().analyze(request: request)
+        await EchoAIProcessor().processUserCommand(request.text)
     }
 
     // Execute dispatches each action to the appropriate native agent.
