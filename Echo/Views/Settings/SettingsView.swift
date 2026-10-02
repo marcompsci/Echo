@@ -3,9 +3,11 @@ import SwiftData
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss)      private var dismiss
+    @Environment(PetState.self)  private var petState
     @State private var vm = SettingsViewModel()
     @AppStorage("imageRetentionPolicy") private var retentionRaw: String = EchoSession.ImageRetentionPolicy.noSave.rawValue
+    @AppStorage("echoPetEnabled")       private var petEnabled = false
 
     private var retentionPolicy: Binding<EchoSession.ImageRetentionPolicy> {
         Binding(
@@ -20,6 +22,7 @@ struct SettingsView: View {
                 Color.echoBackground.ignoresSafeArea()
                 List {
                     accountSection
+                    petSection
                     dataSection
                     permissionsSection
                     aboutSection
@@ -78,11 +81,51 @@ struct SettingsView: View {
         .listRowBackground(Color.echoSurface)
     }
 
+    // MARK: - Digital pet section
+
+    private var petSection: some View {
+        Section {
+            Toggle(isOn: $petEnabled) {
+                Label("Echo Pet", systemImage: "pawprint.fill")
+                    .foregroundStyle(.echoTextPrimary)
+            }
+            .tint(Color.echoLavender)
+
+            if petEnabled {
+                NavigationLink {
+                    PetCustomizationView(pet: petState)
+                } label: {
+                    HStack {
+                        Label("Customize \(petState.name)", systemImage: "paintpalette")
+                            .foregroundStyle(.echoTextPrimary)
+                        Spacer()
+                        PetCharacterView(
+                            mood: petState.mood,
+                            bodyColor: petState.bodyColor,
+                            accessory: petState.accessory,
+                            isBlinking: false,
+                            pupilOffset: .zero,
+                            isExcited: false,
+                            size: 36
+                        )
+                        .accessibilityHidden(true)
+                    }
+                }
+            }
+
+            Text("Your pet lives on the home screen. Tap it to interact, hold to feed or customize, and drag it out of the way when needed.")
+                .font(.echoCaption)
+                .foregroundStyle(.echoTextTertiary)
+        } header: {
+            Text("Digital Pet")
+        }
+        .listRowBackground(Color.echoSurface)
+    }
+
     // MARK: - Data section
 
     private var dataSection: some View {
         Section {
-            // Image retention picker
             VStack(alignment: .leading, spacing: EchoSpacing.xs) {
                 Text("Image retention")
                     .font(.echoSubheadline)
@@ -141,7 +184,6 @@ struct SettingsView: View {
 
     private var permissionsSection: some View {
         Section("Permissions") {
-            // Microphone
             HStack {
                 Label("Microphone", systemImage: "mic.fill")
                     .foregroundStyle(.echoTextPrimary)
@@ -157,7 +199,6 @@ struct SettingsView: View {
                 }
             }
 
-            // Speech recognition
             HStack {
                 Label("Speech Recognition", systemImage: "waveform.and.mic")
                     .foregroundStyle(.echoTextPrimary)
@@ -173,7 +214,6 @@ struct SettingsView: View {
                 }
             }
 
-            // Photos
             HStack(alignment: .top, spacing: EchoSpacing.sm) {
                 Label("Photos", systemImage: "photo")
                     .foregroundStyle(.echoTextPrimary)
@@ -199,14 +239,12 @@ struct SettingsView: View {
             }
 
             Button {
-                // Placeholder — link to Terms of Use URL when available
             } label: {
                 Label("Terms of Use", systemImage: "doc.text")
                     .foregroundStyle(.echoTextPrimary)
             }
 
             Button {
-                // Placeholder — link to Privacy Policy URL when available
             } label: {
                 Label("Privacy Policy", systemImage: "hand.raised")
                     .foregroundStyle(.echoTextPrimary)
@@ -229,11 +267,11 @@ struct SettingsView: View {
 
 private struct PrivacyInfoView: View {
     private let points: [(icon: String, title: String, detail: String)] = [
-        ("hand.raised.fill", "You control what Echo sees", "Echo never accesses your screen, camera, or microphone without a direct action from you."),
-        ("mic.slash.fill", "Voice is always push-to-talk", "Echo only records when you hold the voice button. Nothing is recorded in the background."),
-        ("photo.slash", "Photos stay on your device", "Echo uses the system image picker. Images are shared with the analysis service only when you tap 'Create My Guide'."),
-        ("trash.fill", "Delete anytime", "Remove any guide — including any saved image — at any time from the guide screen or from 'Delete all guides' in Settings."),
-        ("server.rack", "Provider keys stay on the server", "Your API keys and model-provider credentials are never stored in the app. All analysis is proxied through a server you control.")
+        ("hand.raised.fill",  "You control what Echo sees",       "Echo never accesses your screen, camera, or microphone without a direct action from you."),
+        ("mic.slash.fill",    "Voice is always push-to-talk",     "Echo only records when you hold the voice button. Nothing is recorded in the background."),
+        ("photo.slash",       "Photos stay on your device",       "Echo uses the system image picker. Images are shared with the analysis service only when you tap 'Create My Guide'."),
+        ("trash.fill",        "Delete anytime",                   "Remove any guide — including any saved image — at any time from the guide screen or from 'Delete all guides' in Settings."),
+        ("server.rack",       "Provider keys stay on the server", "Your API keys and model-provider credentials are never stored in the app. All analysis is proxied through a server you control.")
     ]
 
     var body: some View {
@@ -275,5 +313,6 @@ private struct PrivacyInfoView: View {
 
 #Preview {
     SettingsView()
+        .environment(PetState())
         .modelContainer(for: EchoSession.self, inMemory: true)
 }

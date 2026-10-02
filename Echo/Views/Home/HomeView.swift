@@ -3,8 +3,10 @@ import SwiftData
 import PhotosUI
 
 struct HomeView: View {
-    @Environment(AppRouter.self) private var router
-    @Environment(\.modelContext) private var modelContext
+    @Environment(AppRouter.self)   private var router
+    @Environment(\.modelContext)   private var modelContext
+    @Environment(PetState.self)    private var petState
+    @AppStorage("echoPetEnabled")  private var petEnabled = false
     @State private var vm = HomeViewModel()
     @State private var selectedPhoto: PhotosPickerItem? = nil
     @State private var showHowItWorks = false
@@ -16,14 +18,21 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: EchoSpacing.lg) {
                     headerSection
-                    agentHeroCard       // Echo Agent — primary feature
+                    agentHeroCard
                     Divider().background(Color.echoSeparator).padding(.horizontal, EchoSpacing.lg)
-                    guideSection        // Visual guide flow (secondary)
+                    guideSection
                     recentSection
                 }
                 .padding(.horizontal, EchoSpacing.md)
                 .padding(.top, EchoSpacing.md)
                 .padding(.bottom, EchoSpacing.xxxl)
+            }
+
+            // Floating pet — sits above scroll content, draggable anywhere
+            if petEnabled {
+                GeometryReader { geo in
+                    FloatingPetView(containerSize: geo.size)
+                }
             }
         }
         .navigationBarHidden(true)
@@ -305,10 +314,10 @@ private struct ActionRowVisual: View {
 private struct HowItWorksSheet: View {
     @Environment(\.dismiss) private var dismiss
     private let steps: [(icon: String, title: String, detail: String)] = [
-        ("sparkles", "Echo Agent", "Tell Echo what to do in plain language. It reads your request, shows you a full plan, and only acts after you confirm."),
+        ("sparkles",         "Echo Agent",                  "Tell Echo what to do in plain language. It reads your request, shows you a full plan, and only acts after you confirm."),
         ("photo.badge.plus", "Share a screenshot or photo", "Import any image from your library or paste from your clipboard. Echo never accesses your photos without your action."),
-        ("text.bubble", "Ask your question", "Type what you want to know, or hold the voice button and speak naturally."),
-        ("checkmark.circle", "Review, confirm, done", "Every suggested action — including agent tasks — shows you exactly what will happen before you confirm.")
+        ("text.bubble",      "Ask your question",           "Type what you want to know, or hold the voice button and speak naturally."),
+        ("checkmark.circle", "Review, confirm, done",       "Every suggested action — including agent tasks — shows you exactly what will happen before you confirm.")
     ]
 
     var body: some View {
@@ -362,5 +371,6 @@ private struct HowItWorksSheet: View {
 #Preview {
     HomeView()
         .environment(AppRouter())
+        .environment(PetState())
         .modelContainer(for: EchoSession.self, inMemory: true)
 }

@@ -5,6 +5,7 @@ import SwiftData
 struct EchoApp: App {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var router = AppRouter()
+    @State private var petState = PetState()
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([EchoSession.self])
@@ -21,6 +22,7 @@ struct EchoApp: App {
             if hasSeenOnboarding {
                 HomeRootView()
                     .environment(router)
+                    .environment(petState)
             } else {
                 OnboardingView(onComplete: { hasSeenOnboarding = true })
             }
