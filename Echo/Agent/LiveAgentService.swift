@@ -34,6 +34,9 @@ struct LiveAgentService: AgentService {
     // MARK: - Dispatch
 
     private func dispatch(_ action: AgentAction) async throws {
+        guard !action.isBlockedInV1 else {
+            throw EchoAgentError.executionFailed("This action isn't available in this version of Echo.")
+        }
         switch action {
 
         // Contacts

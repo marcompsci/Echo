@@ -33,7 +33,7 @@ final class AnalyzeViewModel {
     private let speechService: any SpeechServiceProtocol
 
     init(
-        guideService: any GuideService = MockGuideService(),
+        guideService: any GuideService = EchoConfig.makeGuideService(),
         speechService: any SpeechServiceProtocol = MockSpeechService()
     ) {
         self.guideService = guideService

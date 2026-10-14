@@ -11,7 +11,7 @@ struct GuideStepCard: View {
                 // Step number badge
                 ZStack {
                     Circle()
-                        .fill(isSelected ? LinearGradient.echoAccent : AnyShapeStyle(Color.echoSurfaceElevated))
+                        .fill(isSelected ? AnyShapeStyle(LinearGradient.echoAccent) : AnyShapeStyle(Color.echoSurfaceElevated))
                         .frame(width: 36, height: 36)
                     Text("\(step.number)")
                         .font(.echoHeadline)

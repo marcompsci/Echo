@@ -141,6 +141,12 @@ struct EchoAIProcessor: Sendable {
         func toAgentPlan() -> AgentPlan {
             switch self {
 
+            case .deleteContact where !FeatureFlags.allowsPhotoAndContactDeletion:
+                return .deletionUnavailable("contacts", appName: "Contacts")
+
+            case .deletePhoto where !FeatureFlags.allowsPhotoAndContactDeletion:
+                return .deletionUnavailable("photos", appName: "Photos")
+
             case .deleteContact(let name):
                 return AgentPlan(
                     title: "Delete contact",

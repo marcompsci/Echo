@@ -33,7 +33,7 @@ struct PetCustomizationView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
-                        .foregroundStyle(.echoLavender)
+                        .foregroundStyle(Color.echoLavender)
                 }
             }
             .onAppear { bobbing = true }
@@ -67,10 +67,10 @@ struct PetCustomizationView: View {
 
             Text(pet.name)
                 .font(.echoTitle3)
-                .foregroundStyle(.echoTextPrimary)
+                .foregroundStyle(Color.echoTextPrimary)
             Text("Mood: \(pet.mood.label)")
                 .font(.echoCaption)
-                .foregroundStyle(.echoTextSecondary)
+                .foregroundStyle(Color.echoTextSecondary)
         }
     }
 
@@ -81,10 +81,10 @@ struct PetCustomizationView: View {
             VStack(alignment: .leading, spacing: EchoSpacing.xs) {
                 Text("Name")
                     .font(.echoHeadline)
-                    .foregroundStyle(.echoTextPrimary)
+                    .foregroundStyle(Color.echoTextPrimary)
                 TextField("Enter a name", text: $pet.name)
                     .font(.echoBody)
-                    .foregroundStyle(.echoTextPrimary)
+                    .foregroundStyle(Color.echoTextPrimary)
                     .textFieldStyle(.plain)
                     .padding(EchoSpacing.sm)
                     .background(Color.echoBackground)
@@ -101,7 +101,7 @@ struct PetCustomizationView: View {
             VStack(alignment: .leading, spacing: EchoSpacing.md) {
                 Text("Status")
                     .font(.echoHeadline)
-                    .foregroundStyle(.echoTextPrimary)
+                    .foregroundStyle(Color.echoTextPrimary)
 
                 statBar(label: "Happiness", value: pet.happiness / 100, color: .echoMint)
                 statBar(label: "Energy",    value: pet.energy    / 100, color: .echoLavender)
@@ -133,11 +133,11 @@ struct PetCustomizationView: View {
             HStack {
                 Text(label)
                     .font(.echoCaption)
-                    .foregroundStyle(.echoTextSecondary)
+                    .foregroundStyle(Color.echoTextSecondary)
                 Spacer()
                 Text("\(Int(value * 100))%")
                     .font(.echoCaption2)
-                    .foregroundStyle(.echoTextTertiary)
+                    .foregroundStyle(Color.echoTextTertiary)
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -160,7 +160,7 @@ struct PetCustomizationView: View {
             VStack(alignment: .leading, spacing: EchoSpacing.md) {
                 Text("Color")
                     .font(.echoHeadline)
-                    .foregroundStyle(.echoTextPrimary)
+                    .foregroundStyle(Color.echoTextPrimary)
 
                 HStack(spacing: EchoSpacing.sm) {
                     ForEach(PetBodyColor.allCases, id: \.rawValue) { c in
@@ -198,7 +198,7 @@ struct PetCustomizationView: View {
             VStack(alignment: .leading, spacing: EchoSpacing.md) {
                 Text("Accessory")
                     .font(.echoHeadline)
-                    .foregroundStyle(.echoTextPrimary)
+                    .foregroundStyle(Color.echoTextPrimary)
 
                 HStack(spacing: EchoSpacing.xs) {
                     ForEach(PetAccessory.allCases, id: \.rawValue) { acc in

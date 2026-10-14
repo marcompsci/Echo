@@ -8,8 +8,8 @@ struct AgentView: View {
 
     // Quick command suggestions
     private let suggestions: [(icon: String, text: String)] = [
-        ("person.crop.circle.badge.minus", "Delete duplicate contacts"),
-        ("photo.badge.minus",              "Clear old screenshots"),
+        ("bell.badge.plus",                "Remind me to pay my phone bill Friday"),
+        ("photo.on.rectangle.angled",      "Create an album called Receipts"),
         ("bell.badge.plus",                "Remind me to follow up tomorrow"),
         ("note.text.badge.plus",           "Save this note: "),
         ("folder.badge.plus",              "Create a folder called Projects"),

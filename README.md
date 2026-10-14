@@ -92,6 +92,36 @@ To activate a live backend:
 
 ---
 
+## Live AI backend (Claude via Supabase)
+
+Echo's real guides come from a Supabase Edge Function in `supabase/functions/echo-guide/`.
+
+**How it works:** the app shrinks the screenshot, reads all on-screen text on-device (Vision OCR) with exact positions, and sends both plus the question to the function. The function asks Claude for a plain-language summary, numbered steps, and markers. Claude points at the OCR'd text IDs, so markers land exactly on the right button (icons without text get Claude's best-estimate box). The function returns a `GuideResponse` the app decodes directly.
+
+**One-time setup**
+
+1. Install the Supabase CLI: `brew install supabase/tap/supabase`
+2. Log in: `supabase login`
+3. Create a Supabase project (or reuse one) and copy its **project ref** (Project Settings → General).
+4. From this folder (the one containing `supabase/`), set secrets and deploy:
+   ```
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-... --project-ref YOUR_REF
+   supabase functions deploy echo-guide --project-ref YOUR_REF --no-verify-jwt --use-api
+   ```
+   Optional: `supabase secrets set ECHO_MODEL=claude-haiku-5-5` for a cheaper, faster model (default is `claude-sonnet-5-5`).
+5. In `Echo/Services/EchoConfig.swift`, paste your **Project URL** and **anon public key** (Project Settings → API).
+6. Run the app. With real values in `EchoConfig`, `AnalyzeViewModel` uses `LiveGuideService`; with the placeholders it falls back to `MockGuideService`.
+
+**Logs:** `supabase functions logs echo-guide --project-ref YOUR_REF` (images are never logged).
+
+**Before a wider launch:** the anon key ships inside the app, so anyone who extracts it could call the function. Fine for TestFlight; before public release add Supabase Auth (anonymous sign-in) + per-user rate limits.
+
+## v1 safety: no photo or contact deletion
+
+`FeatureFlags.allowsPhotoAndContactDeletion` is `false`. Delete requests return an explanation instead of a plan, and `PhotoAgent`, `ContactAgent`, and `LiveAgentService` all refuse to delete even if a delete action somehow reaches them.
+
+---
+
 ## Required Info.plist keys
 
 | Key | Reason |

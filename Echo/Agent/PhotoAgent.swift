@@ -103,6 +103,9 @@ actor PhotoAgent {
     // MARK: - Delete
 
     func delete(localIdentifiers: [String]) async throws {
+        guard FeatureFlags.allowsPhotoAndContactDeletion else {
+            throw EchoAgentError.executionFailed("Deleting photos isn't available in this version of Echo.")
+        }
         guard await requestAccess() else {
             throw EchoAgentError.permissionDenied("Photos")
         }

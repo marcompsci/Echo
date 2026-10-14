@@ -266,14 +266,14 @@ private struct ActionRowVisual: View {
         HStack(spacing: EchoSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: EchoSpacing.Corner.md)
-                    .fill(isPrimary ? LinearGradient.echoAccent : AnyShapeStyle(Color.echoSurfaceElevated))
+                    .fill(isPrimary ? AnyShapeStyle(LinearGradient.echoAccent) : AnyShapeStyle(Color.echoSurfaceElevated))
                     .frame(width: 48, height: 48)
                 if isLoading {
                     ProgressView().tint(.white)
                 } else {
                     Image(systemName: systemImage)
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(isPrimary ? .white : AnyShapeStyle(LinearGradient.echoAccent))
+                        .foregroundStyle(isPrimary ? AnyShapeStyle(Color.white) : AnyShapeStyle(LinearGradient.echoAccent))
                 }
             }
             .accessibilityHidden(true)

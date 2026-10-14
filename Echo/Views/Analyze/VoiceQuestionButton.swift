@@ -46,7 +46,7 @@ struct VoiceQuestionButton: View {
                     .overlay {
                         Image(systemName: isRecording ? "stop.fill" : "mic.fill")
                             .font(.system(size: 26, weight: .semibold))
-                            .foregroundStyle(isRecording ? .white : AnyShapeStyle(LinearGradient.echoAccent))
+                            .foregroundStyle(isRecording ? AnyShapeStyle(Color.white) : AnyShapeStyle(LinearGradient.echoAccent))
                     }
                     .scaleEffect(isPressed ? 0.92 : 1.0)
             }

@@ -12,11 +12,11 @@
 
 	<!-- Agent: read and manage contacts when you ask Echo to -->
 	<key>NSContactsUsageDescription</key>
-	<string>Echo reads and manages your contacts only when you explicitly ask it to — for example, to delete duplicates or find someone. Echo always shows you a full plan and asks for confirmation before making any changes.</string>
+	<string>Echo accesses your contacts only when you explicitly ask it to — for example, to add someone new. Echo never deletes contacts and always shows you a plan before making any changes.</string>
 
 	<!-- Agent: read and delete photos when you ask Echo to -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Echo accesses your photo library only when you ask it to — for example, to find large videos or clear old screenshots. Echo shows you exactly what it will remove before doing anything.</string>
+	<string>Echo accesses your photo library only when you ask it to — for example, to find large videos or organize photos into an album. Echo never deletes photos.</string>
 
 	<!-- Agent: add photos when saving annotated guide images -->
 	<key>NSPhotoLibraryAddUsageDescription</key>

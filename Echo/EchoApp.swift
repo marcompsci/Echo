@@ -19,18 +19,20 @@ struct EchoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if hasSeenOnboarding {
-                HomeRootView()
-                    .environment(router)
-                    .environment(petState)
-            } else {
-                OnboardingView(onComplete: { hasSeenOnboarding = true })
+            Group {
+                if hasSeenOnboarding {
+                    HomeRootView()
+                        .environment(router)
+                        .environment(petState)
+                } else {
+                    OnboardingView(onComplete: { hasSeenOnboarding = true })
+                }
+            }
+            .onOpenURL { url in
+                handleIncomingURL(url)
             }
         }
         .modelContainer(sharedModelContainer)
-        .onOpenURL { url in
-            handleIncomingURL(url)
-        }
     }
 
     private func handleIncomingURL(_ url: URL) {

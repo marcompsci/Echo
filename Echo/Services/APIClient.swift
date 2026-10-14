@@ -1,41 +1,68 @@
 import Foundation
 
-// MARK: - API Client scaffold
-// No live calls are made in this build.
-// See README "Replacing MockGuideService" to activate.
+// MARK: - API client for the Echo guide backend (Supabase Edge Function "echo-guide")
+// Provider API keys never live in the app — only the public Supabase anon key.
 
 struct APIClient: Sendable {
-    private let baseURL: URL
+    private let endpoint: URL
+    private let anonKey: String
     private let session: URLSession
 
     init(
-        baseURL: URL = URL(string: "https://api.yourdomain.com/v1")!,
+        endpoint: URL = EchoConfig.guideEndpoint,
+        anonKey: String = EchoConfig.supabaseAnonKey,
         session: URLSession = .shared
     ) {
-        self.baseURL = baseURL
+        self.endpoint = endpoint
+        self.anonKey = anonKey
         self.session = session
     }
 
     func createGuide(request: GuideAPIRequest) async throws -> GuideResponse {
-        let endpoint = baseURL.appendingPathComponent("guides")
         var urlRequest = URLRequest(url: endpoint)
         urlRequest.httpMethod = "POST"
+        urlRequest.timeoutInterval = 60
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // Authorization: add server-issued Bearer token here (not a provider key)
-        // urlRequest.setValue("Bearer \(serverToken)", forHTTPHeaderField: "Authorization")
-
+        urlRequest.setValue(anonKey, forHTTPHeaderField: "apikey")
+        // Legacy anon keys are JWTs and also go in Authorization.
+        // New publishable keys (sb_publishable_…) are not JWTs and must only use "apikey".
+        if anonKey.hasPrefix("eyJ") {
+            urlRequest.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        }
         urlRequest.httpBody = try JSONEncoder().encode(request)
 
-        let (data, response) = try await session.data(for: urlRequest)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: urlRequest)
+        } catch let error as URLError {
+            switch error.code {
+            case .notConnectedToInternet, .networkConnectionLost, .cannotFindHost, .cannotConnectToHost:
+                throw EchoError.networkUnavailable
+            case .timedOut:
+                throw EchoError.analysisUnavailable
+            default:
+                throw EchoError.networkUnavailable
+            }
+        }
 
         guard let http = response as? HTTPURLResponse else {
             throw EchoError.invalidResponse
         }
 
-        guard (200...299).contains(http.statusCode) else {
-            throw http.statusCode == 503
-                ? EchoError.analysisUnavailable
-                : EchoError.invalidResponse
+        switch http.statusCode {
+        case 200...299:
+            break
+        case 413:
+            throw EchoError.unknown("That image is too large. Try a regular screenshot.")
+        case 429:
+            throw EchoError.unknown("Echo is busy right now. Wait a moment and try again.")
+        case 401, 403:
+            throw EchoError.unknown("Echo couldn't connect to its guide service. Check the Supabase keys in EchoConfig.swift.")
+        case 503:
+            throw EchoError.analysisUnavailable
+        default:
+            throw EchoError.invalidResponse
         }
 
         do {
@@ -50,27 +77,22 @@ struct APIClient: Sendable {
 
 struct GuideAPIRequest: Codable, Sendable {
     let imageBase64: String
+    let mediaType: String
     let userQuestion: String
     let deviceLocale: String
     let appVersion: String
+    let imageWidth: Int
+    let imageHeight: Int
+    let elements: [ScreenTextElement]
 
-    init(imageData: Data, userQuestion: String) {
-        self.imageBase64 = imageData.base64EncodedString()
+    init(prepared: PreparedGuideImage, userQuestion: String) {
+        self.imageBase64 = prepared.jpegData.base64EncodedString()
+        self.mediaType = "image/jpeg"
         self.userQuestion = userQuestion
         self.deviceLocale = Locale.current.identifier
         self.appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        self.imageWidth = prepared.pixelWidth
+        self.imageHeight = prepared.pixelHeight
+        self.elements = prepared.elements
     }
 }
-
-// MARK: - Live service (activate by uncommenting + injecting into AnalyzeViewModel)
-
-// struct LiveGuideService: GuideService {
-//     private let client: APIClient
-//
-//     init(client: APIClient = APIClient()) { self.client = client }
-//
-//     func createGuide(imageData: Data, userQuestion: String) async throws -> GuideResponse {
-//         let req = GuideAPIRequest(imageData: imageData, userQuestion: userQuestion)
-//         return try await client.createGuide(request: req)
-//     }
-// }

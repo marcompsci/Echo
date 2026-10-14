@@ -113,3 +113,21 @@ extension Color {
 // Keep AnnotationColorStyle accessible here for the color helper above.
 // The canonical definition lives in Annotation.swift.
 typealias AnnotationColorStyle = Annotation.ColorStyle
+
+// MARK: - ShapeStyle dot-syntax support (Swift 6 / Xcode 26)
+// Swift 6.3 no longer resolves Color static members through the ShapeStyle protocol.
+// This constrained extension re-exposes each token so .echoTextPrimary etc. work
+// in foregroundStyle(), fill(), stroke(), and similar ShapeStyle contexts.
+extension ShapeStyle where Self == Color {
+    static var echoBackground:      Color { Color.echoBackground }
+    static var echoSurface:         Color { Color.echoSurface }
+    static var echoSurfaceElevated: Color { Color.echoSurfaceElevated }
+    static var echoLavender:        Color { Color.echoLavender }
+    static var echoMint:            Color { Color.echoMint }
+    static var echoWarning:         Color { Color.echoWarning }
+    static var echoDestructive:     Color { Color.echoDestructive }
+    static var echoTextPrimary:     Color { Color.echoTextPrimary }
+    static var echoTextSecondary:   Color { Color.echoTextSecondary }
+    static var echoTextTertiary:    Color { Color.echoTextTertiary }
+    static var echoSeparator:       Color { Color.echoSeparator }
+}

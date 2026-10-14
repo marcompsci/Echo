@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import AVFAudio
+import Speech
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -124,7 +126,7 @@ struct SettingsView: View {
 
     // MARK: - Data section
 
-    private var dataSection: some View {
+    @ViewBuilder private var dataSection: some View {
         Section {
             VStack(alignment: .leading, spacing: EchoSpacing.xs) {
                 Text("Image retention")

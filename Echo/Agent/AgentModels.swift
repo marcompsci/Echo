@@ -56,6 +56,15 @@ enum AgentAction: Identifiable, Sendable {
         }
     }
 
+    /// True for actions turned off in v1 (see FeatureFlags).
+    var isBlockedInV1: Bool {
+        guard !FeatureFlags.allowsPhotoAndContactDeletion else { return false }
+        switch self {
+        case .deleteContact, .deletePhoto: return true
+        default: return false
+        }
+    }
+
     var isDestructive: Bool {
         switch self {
         case .deleteContact, .deletePhoto, .deleteFile, .deleteReminder: return true
@@ -128,6 +137,15 @@ struct AgentPlan: Identifiable, Sendable {
     }
 
     var hasDestructiveActions: Bool { actions.contains { $0.isDestructive } }
+
+    /// Shown instead of a delete plan while photo/contact deletion is off in v1.
+    static func deletionUnavailable(_ kind: String, appName: String) -> AgentPlan {
+        AgentPlan(
+            title: "Echo can't delete \(kind) yet",
+            explanation: "To keep your \(kind) safe, this version of Echo doesn't delete them. You can remove them yourself in the \(appName) app — Echo can walk you through it if you send a screenshot.",
+            actions: []
+        )
+    }
     var destructiveCount: Int { actions.filter { $0.isDestructive }.count }
 }
 

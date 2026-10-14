@@ -17,7 +17,7 @@ struct AgentPlanView: View {
                 ScrollView {
                     VStack(spacing: EchoSpacing.lg) {
                         headerSection
-                        actionsSection
+                        if !plan.actions.isEmpty { actionsSection }
                         if plan.hasDestructiveActions { warningSection }
                         buttonSection
                     }
@@ -116,7 +116,16 @@ struct AgentPlanView: View {
 
     // MARK: - Buttons
 
+    @ViewBuilder
     private var buttonSection: some View {
+        if plan.actions.isEmpty {
+            EchoButton("Got it", systemImage: "checkmark.circle.fill", action: onCancel)
+        } else {
+            actionButtons
+        }
+    }
+
+    private var actionButtons: some View {
         VStack(spacing: EchoSpacing.sm) {
             EchoButton(
                 plan.hasDestructiveActions ? "Confirm & Execute" : "Run These Actions",
@@ -143,8 +152,8 @@ private struct AgentActionRow: View {
                     ZStack {
                         RoundedRectangle(cornerRadius: EchoSpacing.Corner.sm)
                             .fill(action.isDestructive
-                                  ? Color.echoDestructive.opacity(0.15)
-                                  : LinearGradient.echoAccentSubtle)
+                                  ? AnyShapeStyle(Color.echoDestructive.opacity(0.15))
+                                  : AnyShapeStyle(LinearGradient.echoAccentSubtle))
                             .frame(width: 36, height: 36)
                         Image(systemName: action.icon)
                             .font(.echoSubheadline)
