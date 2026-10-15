@@ -2,39 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Voice button in AnalyzeView and AgentView -->
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Echo uses your microphone only when you hold the voice button to ask a question or give a command.</string>
-
-	<!-- Converts held-button audio into text -->
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Echo converts your spoken question or command into text so it can create your guide or run your task.</string>
-
-	<!-- Agent: read and manage contacts when you ask Echo to -->
-	<key>NSContactsUsageDescription</key>
-	<string>Echo accesses your contacts only when you explicitly ask it to — for example, to add someone new. Echo never deletes contacts and always shows you a plan before making any changes.</string>
-
-	<!-- Agent: read and delete photos when you ask Echo to -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Echo accesses your photo library only when you ask it to — for example, to find large videos or organize photos into an album. Echo never deletes photos.</string>
-
-	<!-- Agent: add photos when saving annotated guide images -->
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Echo can save annotated guide images to your photo library when you request it.</string>
-
-	<!-- Agent: create and manage reminders when you ask Echo to -->
-	<key>NSRemindersUsageDescription</key>
-	<string>Echo creates or manages reminders only when you ask it to. You review every action before it runs.</string>
-
-	<!-- Agent: create and read calendar events when you ask Echo to -->
-	<key>NSCalendarsUsageDescription</key>
-	<string>Echo creates or reads calendar events only when you ask it to. You review every action before it runs.</string>
-
-	<!-- Echo's orb on the Lock Screen and in the Dynamic Island -->
-	<key>NSSupportsLiveActivities</key>
-	<true/>
-
-	<!-- URL scheme: used by future Share Extension (echo://import) and Agent deep links -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -46,5 +13,34 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Echo adds calendar events only when you ask, shows you the plan first, and lets you undo it.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Echo adds calendar events only when you ask, shows you the plan first, and lets you undo it.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Echo uses your contacts only when you ask, for example to text or call someone or add a new contact. Echo never deletes contacts.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Echo listens only after you tap the orb, use Hey Echo, or press the voice button, so you can ask a question or give a command.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Echo can save guide images and organize photos into albums when you ask it to.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Echo opens your latest screenshot when you ask for help, and Photo Cleanup groups screenshots, big videos and duplicates. Nothing is deleted unless you pick it and confirm.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Echo creates reminders only when you ask, shows you the plan first, and lets you undo it.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>Echo creates reminders only when you ask, shows you the plan first, and lets you undo it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Echo turns what you say into text on your iPhone so it can answer, guide you, or do a task you asked for.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchMark</string>
+		<key>UIImageRespectsSafeAreaInsets</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

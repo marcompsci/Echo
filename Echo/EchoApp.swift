@@ -8,6 +8,7 @@ struct EchoApp: App {
     @State private var router = AppRouter()
     @State private var petState = PetState()
     @AppStorage(EchoAppearance.storageKey) private var appearanceRaw = EchoAppearance.system.rawValue
+    @State private var showSplash = true
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([EchoSession.self])
@@ -28,6 +29,12 @@ struct EchoApp: App {
                         .environment(petState)
                 } else {
                     OnboardingView(onComplete: { hasSeenOnboarding = true })
+                }
+            }
+            .overlay {
+                if showSplash {
+                    EchoSplashView { showSplash = false }
+                        .transition(.identity)
                 }
             }
             .preferredColorScheme((EchoAppearance(rawValue: appearanceRaw) ?? .system).colorScheme)
