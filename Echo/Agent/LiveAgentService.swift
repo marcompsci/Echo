@@ -9,6 +9,13 @@ struct LiveAgentService: AgentService {
     private let files     = FileAgent()
     private let reminders = ReminderAgent()
 
+    /// Shown in "What Echo did" (Echo Agent, Hey Echo, a Skill, Shortcuts…).
+    var origin = "Echo Agent"
+
+    init(origin: String = "Echo Agent") {
+        self.origin = origin
+    }
+
     // On-device NLP via EchoAIProcessor (CoreML + NaturalLanguage + Vision).
     // Replace with a backend call in LiveGuideService once an API is available.
     // Apple Intelligence plans the task on-device when available;
@@ -26,13 +33,20 @@ struct LiveAgentService: AgentService {
     func execute(plan: AgentPlan) async throws -> AgentResult {
         var completed: [AgentAction] = []
         var failed: [(AgentAction, String)] = []
+        let batch = UUID()
 
         for action in plan.actions {
             do {
-                try await dispatch(action)
+                let undo = try await dispatch(action)
                 completed.append(action)
+                ActivityLog.shared.record(ActivityEntry(
+                    batch: batch, summary: action.summary, icon: action.icon, origin: origin,
+                    status: action.isHandOff ? .handedOff : .done, undo: undo))
             } catch {
                 failed.append((action, error.localizedDescription))
+                ActivityLog.shared.record(ActivityEntry(
+                    batch: batch, summary: action.summary, icon: action.icon, origin: origin,
+                    status: .failed, detail: error.localizedDescription))
             }
         }
 
@@ -41,7 +55,9 @@ struct LiveAgentService: AgentService {
 
     // MARK: - Dispatch
 
-    private func dispatch(_ action: AgentAction) async throws {
+    /// Runs one action. Returns how to undo it when Echo created something undoable.
+    @discardableResult
+    private func dispatch(_ action: AgentAction) async throws -> UndoToken? {
         guard !action.isBlockedInV1 else {
             throw EchoAgentError.executionFailed("This action isn't available in this version of Echo.")
         }
@@ -61,7 +77,8 @@ struct LiveAgentService: AgentService {
 
         // Files
         case .createFile(let name, _, let content):
-            _ = try await files.createTextFile(name: name, content: content)
+            let url = try await files.createTextFile(name: name, content: content)
+            return .file(path: url.path)
         case .deleteFile(let path, _):
             try await files.delete(path: path)
         case .renameFile(let path, let newName):
@@ -69,7 +86,8 @@ struct LiveAgentService: AgentService {
 
         // Reminders
         case .createReminder(let title, let date):
-            try await reminders.createReminder(title: title, dueDate: date)
+            let id = try await reminders.createReminder(title: title, dueDate: date)
+            return .reminder(id: id)
         case .deleteReminder(let id, _):
             try await reminders.deleteReminder(calendarItemID: id)
 
@@ -79,7 +97,8 @@ struct LiveAgentService: AgentService {
 
         // Calendar
         case .createEvent(let title, let start, let end):
-            try await reminders.createEvent(title: title, start: start, end: end)
+            let id = try await reminders.createEvent(title: title, start: start, end: end)
+            return .event(id: id)
 
         // Hand-offs (iOS never lets an app send/call for you; the person taps)
         case .sendMessage(let recipient, let body):
@@ -100,6 +119,7 @@ struct LiveAgentService: AgentService {
             let full = url.lowercased().hasPrefix("http") ? url : "https://\(url)"
             try await open(full)
         }
+        return nil
     }
 
     // MARK: - Hand-off helpers

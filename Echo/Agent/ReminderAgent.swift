@@ -44,7 +44,8 @@ actor ReminderAgent {
         }
     }
 
-    func createReminder(title: String, dueDate: Date?, notes: String? = nil) async throws {
+    @discardableResult
+    func createReminder(title: String, dueDate: Date?, notes: String? = nil) async throws -> String {
         guard await requestRemindersAccess() else {
             throw EchoAgentError.permissionDenied("Reminders")
         }
@@ -59,6 +60,7 @@ actor ReminderAgent {
             reminder.alarms = [EKAlarm(absoluteDate: due)]
         }
         try store.save(reminder, commit: true)
+        return reminder.calendarItemIdentifier
     }
 
     func deleteReminder(calendarItemID: String) async throws {
@@ -73,7 +75,8 @@ actor ReminderAgent {
 
     // MARK: - Calendar events
 
-    func createEvent(title: String, start: Date, end: Date, notes: String? = nil) async throws {
+    @discardableResult
+    func createEvent(title: String, start: Date, end: Date, notes: String? = nil) async throws -> String {
         guard await requestCalendarAccess() else {
             throw EchoAgentError.permissionDenied("Calendar")
         }
@@ -85,6 +88,17 @@ actor ReminderAgent {
         event.calendar = store.defaultCalendarForNewEvents
 
         try store.save(event, span: .thisEvent, commit: true)
+        return event.eventIdentifier ?? event.calendarItemIdentifier
+    }
+
+    /// Used only by Undo, for events Echo itself created.
+    func deleteEvent(eventID: String) async throws {
+        guard await requestCalendarAccess() else {
+            throw EchoAgentError.permissionDenied("Calendar")
+        }
+        let item = store.event(withIdentifier: eventID) ?? (store.calendarItem(withIdentifier: eventID) as? EKEvent)
+        guard let event = item else { throw EchoAgentError.notFound("Calendar event") }
+        try store.remove(event, span: .thisEvent, commit: true)
     }
 
     func fetchUpcomingEvents(days: Int = 7) async throws -> [EKEvent] {

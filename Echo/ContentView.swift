@@ -40,8 +40,8 @@ struct HomeRootView: View {
             SettingsView()
                 .environment(\.modelContext, modelContext)
         }
-        .fullScreenCover(isPresented: $router.showHeyEcho, onDismiss: { router.heyEchoGreeting = nil }) {
-            HeyEchoView(greeting: router.heyEchoGreeting) { route in
+        .fullScreenCover(isPresented: $router.showHeyEcho, onDismiss: { router.heyEchoGreeting = nil; router.heyEchoText = nil }) {
+            HeyEchoView(greeting: router.heyEchoGreeting, initialText: router.heyEchoText) { route in
                 switch route {
                 case .helpWithScreen:
                     launchCenter.request(.lastScreenshot)
@@ -76,7 +76,16 @@ struct HomeRootView: View {
             router.navigateToLiveGuide()
         case .heyEcho:
             router.heyEchoGreeting = UserProfile.helpGreeting
+            router.heyEchoText = nil
             router.showHeyEcho = true
+        case .heyEchoWith(let text):
+            router.heyEchoGreeting = nil
+            router.heyEchoText = text
+            router.showHeyEcho = true
+        case .liveGuideGoal(let goal):
+            router.pendingLiveGoal = goal
+            router.popToHome()
+            router.navigateToLiveGuide()
         case .capturedScreen(let id):
             guard let data = ScreenCaptureStore.take(id) else {
                 launchError = "That screen is no longer available. Try Visual Intelligence again."

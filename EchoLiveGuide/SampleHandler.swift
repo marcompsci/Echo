@@ -146,8 +146,10 @@ final class SampleHandler: RPBroadcastSampleHandler {
         defer { lock.withLock { requestInFlight = false } }
 
         do {
+            // Privacy Shield: hide card numbers, passwords, SSNs, keys before upload.
+            let safe = PrivacyShield.protect(jpeg: jpeg)
             let reply = try await client.nextStep(
-                goal: goal, history: history, jpeg: jpeg,
+                goal: goal, history: history, jpeg: safe.data,
                 width: Int(size.width), height: Int(size.height)
             )
             lock.withLock { consecutiveErrors = 0 }

@@ -14,6 +14,10 @@ struct SettingsView: View {
     @AppStorage(GuideNarrator.autoSpeakKey) private var speakAloud = true
     @AppStorage(UserProfile.nameKey) private var userName = ""
     @AppStorage(EchoPresence.enabledKey) private var presenceEnabled = false
+    @AppStorage(DevInspector.enabledKey) private var developerMode = false
+    @State private var shieldOn = PrivacyShield.isEnabled
+    @State private var memory = EchoMemory.shared
+    @State private var skills = EchoSkillStore.shared
 
     private var retentionPolicy: Binding<EchoSession.ImageRetentionPolicy> {
         Binding(
@@ -29,9 +33,12 @@ struct SettingsView: View {
                 List {
                     accountSection
                     intelligenceSection
+                    personalSection
+                    trustSection
                     petSection
                     dataSection
                     permissionsSection
+                    developerSection
                     aboutSection
                 }
                 .listStyle(.insetGrouped)
@@ -106,6 +113,94 @@ struct SettingsView: View {
         } footer: {
             Text("Echo Agent plans tasks and cleans up voice questions with Apple Intelligence on-device when it's available.")
         }
+    }
+
+    // MARK: - Echo knows you
+
+    private var personalSection: some View {
+        Section {
+            NavigationLink {
+                MemoryView()
+            } label: {
+                HStack {
+                    Label("What Echo Remembers", systemImage: "brain.head.profile")
+                    Spacer()
+                    Text(memory.isEnabled ? "\(memory.facts.count)" : "Off")
+                        .font(.echoFootnote)
+                        .foregroundStyle(.echoTextTertiary)
+                }
+            }
+            NavigationLink {
+                SkillsView()
+            } label: {
+                HStack {
+                    Label("Echo Skills", systemImage: "sparkles.rectangle.stack")
+                    Spacer()
+                    Text("\(skills.skills.count)")
+                        .font(.echoFootnote)
+                        .foregroundStyle(.echoTextTertiary)
+                }
+            }
+            NavigationLink {
+                VoiceSettingsView()
+            } label: {
+                Label("Voice & Simple Mode", systemImage: "person.wave.2")
+            }
+        } header: {
+            Text("Echo Knows You")
+        } footer: {
+            Text("Memory, your own voice commands, and how Echo talks. All stored on this iPhone.")
+        }
+        .listRowBackground(Color.echoSurface)
+    }
+
+    // MARK: - Trust & privacy
+
+    private var trustSection: some View {
+        Section {
+            Toggle(isOn: $shieldOn) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("Privacy Shield", systemImage: "eye.slash")
+                    Text("Blacks out card numbers, SSNs, bank numbers, passwords and secret keys on your iPhone before a screenshot or live frame is sent.")
+                        .font(.echoCaption)
+                        .foregroundStyle(.echoTextTertiary)
+                }
+            }
+            .tint(Color.echoLavender)
+            .onChange(of: shieldOn) { _, on in PrivacyShield.setEnabled(on) }
+
+            NavigationLink {
+                ActivityLogView()
+            } label: {
+                Label("Trust & Undo", systemImage: "checkmark.shield")
+            }
+        } header: {
+            Text("Trust & Privacy")
+        } footer: {
+            Text("See everything Echo did, undo what it created, and choose how independent Echo is.")
+        }
+        .listRowBackground(Color.echoSurface)
+    }
+
+    // MARK: - Developer
+
+    private var developerSection: some View {
+        Section {
+            Toggle("Developer Mode", isOn: $developerMode)
+                .tint(Color.echoLavender)
+            if developerMode {
+                NavigationLink {
+                    DevInspectorView()
+                } label: {
+                    Label("Request Inspector & Hooks", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+            }
+        } header: {
+            Text("Developers")
+        } footer: {
+            Text("See which model answered, how long it took, what Privacy Shield removed, and Echo's links and Shortcuts actions you can build on.")
+        }
+        .listRowBackground(Color.echoSurface)
     }
 
     private var accountSection: some View {

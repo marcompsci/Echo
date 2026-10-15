@@ -45,6 +45,33 @@ struct EchoShortcuts: AppShortcutsProvider {
             systemImageName: "wand.and.stars"
         )
         AppShortcut(
+            intent: UndoEchoActionIntent(),
+            phrases: [
+                "Undo what \(.applicationName) did",
+                "\(.applicationName), undo that"
+            ],
+            shortTitle: "Undo",
+            systemImageName: "arrow.uturn.backward"
+        )
+        AppShortcut(
+            intent: RememberWithEchoIntent(),
+            phrases: [
+                "\(.applicationName), remember something",
+                "Add to \(.applicationName) memory"
+            ],
+            shortTitle: "Remember",
+            systemImageName: "brain.head.profile"
+        )
+        AppShortcut(
+            intent: AskEchoQuestionIntent(),
+            phrases: [
+                "Ask \(.applicationName) a question",
+                "Quick question for \(.applicationName)"
+            ],
+            shortTitle: "Ask a Question",
+            systemImageName: "questionmark.bubble"
+        )
+        AppShortcut(
             intent: AskEchoIntent(),
             phrases: [
                 "Ask \(.applicationName)",

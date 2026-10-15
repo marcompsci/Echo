@@ -11,6 +11,8 @@ enum EchoLaunchRequest: Equatable {
     case agent                   // open Echo Agent
     case liveGuide               // open Live Guide (screen sharing)
     case heyEcho                 // open Echo already listening
+    case heyEchoWith(String)     // ask/do/remember/skill handed in by a link or Shortcut
+    case liveGuideGoal(String)   // Live Guide with a goal
 }
 
 @Observable
@@ -27,9 +29,41 @@ final class EchoLaunchCenter {
         switch url.host?.lowercased() {
         case "last-screenshot": pending = .lastScreenshot; return true
         case "agent":           pending = .agent; return true
-        case "live":            pending = .liveGuide; return true
+        case "live":
+            if let goal = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "goal" })?.value, !goal.isEmpty {
+                pending = .liveGuideGoal(goal)
+            } else {
+                pending = .liveGuide
+            }
+            return true
         case "hey":             pending = .heyEcho; return true
-        default:                return false
+        default:                break
+        }
+        // Developer hooks: echo://ask?q=…  echo://do?task=…  echo://remember?text=…
+        //                  echo://live?goal=…  echo://skill?name=…
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        func value(_ name: String) -> String? {
+            let v = items.first(where: { $0.name == name })?.value?.trimmingCharacters(in: .whitespacesAndNewlines)
+            return (v?.isEmpty ?? true) ? nil : v
+        }
+        switch url.host?.lowercased() {
+        case "ask":
+            guard let q = value("q") else { return false }
+            pending = .heyEchoWith(q); return true
+        case "do":
+            guard let task = value("task") else { return false }
+            pending = .heyEchoWith(task); return true
+        case "remember":
+            guard let text = value("text") else { return false }
+            pending = .heyEchoWith("Remember " + text); return true
+        case "skill":
+            guard let name = value("name"),
+                  let skill = EchoSkillStore.shared.skills.first(where: { $0.name.caseInsensitiveCompare(name) == .orderedSame }),
+                  let phrase = skill.phrases.first else { return false }
+            pending = .heyEchoWith(phrase); return true
+        default:
+            return false
         }
     }
 }

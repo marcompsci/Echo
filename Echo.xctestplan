@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "6F1B6C2A-3E1D-4E8B-9C55-1A2B3C4D5E60",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Echo.xcodeproj",
+        "identifier" : "9D8C72D93066025D0082FCFE",
+        "name" : "EchoTests"
+      }
+    }
+  ],
+  "version" : 1
+}

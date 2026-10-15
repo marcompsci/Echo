@@ -39,11 +39,11 @@ final class GuideNarrator: NSObject {
             parts.append((index, "Step \(step.number). \(step.title). \(step.detail)"))
         }
 
-        let voice = AVSpeechSynthesisVoice(language: AVSpeechSynthesisVoice.currentLanguageCode())
+        let voice = EchoVoicePrefs.voice()
         for (index, text) in parts {
             let utterance = AVSpeechUtterance(string: text)
             utterance.voice = voice
-            utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.95
+            utterance.rate = min(AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceDefaultSpeechRate * 0.95 * EchoVoicePrefs.rateMultiplier)
             utterance.postUtteranceDelay = 0.35
             let id = ObjectIdentifier(utterance)
             stepForUtterance[id] = .some(index)
@@ -68,8 +68,8 @@ final class GuideNarrator: NSObject {
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: AVSpeechSynthesisVoice.currentLanguageCode())
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.97
+        utterance.voice = EchoVoicePrefs.voice()
+        utterance.rate = min(AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceDefaultSpeechRate * 0.97 * EchoVoicePrefs.rateMultiplier)
         let id = ObjectIdentifier(utterance)
         stepForUtterance[id] = .some(nil)
         lastUtterance = id

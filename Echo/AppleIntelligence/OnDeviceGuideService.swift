@@ -62,6 +62,7 @@ struct OnDeviceGuideService: GuideService {
             them to tap. Steps that happen on a later screen get an empty elementID. \
             Never use the same id for two steps. Never invent buttons that aren't listed. \
             Never tell anyone to share a password, verification code, or card number.
+            \(EchoPersonalContext.text())
             """)
 
         let prompt = """
@@ -140,8 +141,14 @@ struct OnDeviceGuideService: GuideService {
         let words = elementText.lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { $0.count >= 3 }
-        guard !words.isEmpty else { return false }
-        return words.contains { stepText.contains($0) }
+        if words.contains(where: { stepText.contains($0) }) { return true }
+        // Short labels like "Wi-Fi", "OK", "TV": compare with punctuation removed.
+        let squash: (String) -> String = { $0.lowercased().unicodeScalars
+            .filter { CharacterSet.alphanumerics.contains($0) }.map(String.init).joined() }
+        let label = squash(elementText)
+        guard label.count >= 2, label.count <= 12 else { return false }
+        let stepWords = stepText.components(separatedBy: .whitespaces).map(squash)
+        return stepWords.contains(label) || squash(stepText).contains(label) && label.count >= 4
     }
 
     private static func region(for el: ScreenTextElement) -> String {

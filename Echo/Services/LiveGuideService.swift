@@ -19,6 +19,7 @@ struct LiveGuideService: GuideService {
             throw EchoError.imageProcessingFailed
         }
 
+        DevInspector.shared.noteShield(prepared.hidden)
         let request = GuideAPIRequest(prepared: prepared, userQuestion: userQuestion)
         return try await client.createGuide(request: request)
     }

@@ -84,8 +84,10 @@ struct GuideAPIRequest: Codable, Sendable {
     let imageWidth: Int
     let imageHeight: Int
     let elements: [ScreenTextElement]
+    /// Name, Simple Mode, and what the person asked Echo to remember (may be empty).
+    let userContext: String
 
-    init(prepared: PreparedGuideImage, userQuestion: String) {
+    init(prepared: PreparedGuideImage, userQuestion: String, userContext: String = EchoPersonalContext.text()) {
         self.imageBase64 = prepared.jpegData.base64EncodedString()
         self.mediaType = "image/jpeg"
         self.userQuestion = userQuestion
@@ -94,5 +96,6 @@ struct GuideAPIRequest: Codable, Sendable {
         self.imageWidth = prepared.pixelWidth
         self.imageHeight = prepared.pixelHeight
         self.elements = prepared.elements
+        self.userContext = userContext
     }
 }

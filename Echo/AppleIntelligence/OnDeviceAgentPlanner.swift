@@ -72,6 +72,7 @@ struct OnDeviceAgentPlanner {
             If the person asks to delete or remove photos or contacts, use deletePhotosOrContacts. \
             Anything else is notSupported. Keep titles short and natural. \
             Today is \(today).
+            \(EchoPersonalContext.text())
             """)
 
         let task = try await session.respond(to: request.text, generating: PlannedAgentTask.self).content

@@ -202,3 +202,20 @@ Key test suites (in `EchoTests/`):
 3. **Add authenticated accounts** — user identity, cloud guide sync, cross-device deletion.
 4. **Add usage limits and StoreKit subscription** — gate advanced features; respect App Store guidelines.
 5. **Conduct TestFlight usability testing before expanding automation** — observe real users before adding Siri automation or proactive suggestions.
+
+## Phase 3 — what people want from an assistant (Oct 2026)
+
+Built from web research on what customers and developers ask of AI assistants:
+
+| People asked for | Echo now has |
+|---|---|
+| Memory between chats (top Reddit request) | **What Echo Remembers** — "Hey Echo, remember…", editable list in Settings, on-device only, refuses secrets |
+| Undo + control before trusting agents (57% trust more with undo; ~34% OK with agents acting) | **Trust & Undo** — activity log of everything Echo did, Undo for reminders/events/files Echo made, "Always ask" vs "Just do small, undoable things" |
+| Privacy | **Privacy Shield** — on-device OCR blacks out card numbers, SSNs, bank numbers, passwords and API keys before any screenshot or Live Guide frame is uploaded |
+| Assistants that understand follow-ups | Hey Echo keeps conversation context; **Conversation mode** keeps listening |
+| Better voices, accessibility | **Voice & Simple Mode** — pick Enhanced/Premium voices, speed, plain-language Simple Mode |
+| Custom skills / extensibility | **Echo Skills** — your own phrases → Shortcut, link, Live Guide, Agent task, or reply |
+| Developer hooks + transparency | Shortcuts actions (Ask Echo a Question → returns text, Remember, Undo), `echo://ask|do|remember|live|skill` links, **Developer Mode** request inspector |
+
+Backend: `echo-guide` accepts an optional `userContext` string (redeploy to use it):
+`supabase functions deploy echo-guide --no-verify-jwt --use-api`

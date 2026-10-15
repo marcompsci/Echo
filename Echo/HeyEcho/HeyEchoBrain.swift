@@ -11,6 +11,10 @@ enum HeyEchoRoute: Equatable {
     case helpWithScreen(String)  // open the latest screenshot with this question
     case walkMeThrough(String)   // Live Guide with this goal
     case answer(String)          // just say the answer
+    case remember(String)        // "remember my gym is Crunch on Market St"
+    case forget(String)          // "forget my gym"
+    case undo                    // "undo that" / "take that back"
+    case skill(EchoSkill)        // one of your own Echo Skills
     case nothingHeard
 }
 
@@ -31,19 +35,33 @@ nonisolated struct HeyEchoDecision {
     var answer: String
 }
 
-struct HeyEchoBrain {
+/// Keeps the conversation going between turns, so follow-ups like
+/// "and what about tomorrow?" work (people's #1 complaint: assistants forget).
+@MainActor
+final class HeyEchoBrain {
+
+    private var session: LanguageModelSession?
+    private var turns = 0
+    private static let maxTurns = 8
+
+    func resetConversation() {
+        session = nil
+        turns = 0
+    }
 
     func route(_ said: String) async -> HeyEchoRoute {
         let text = said.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return .nothingHeard }
 
+        // Instant, on-device, no guessing: memory, undo, and your own Skills.
+        if let direct = Self.directRoute(text) { return direct }
+        if let skill = EchoSkillStore.shared.match(text) { return .skill(skill) }
+
         if AppleIntelligence.isAvailable {
             do {
-                let session = LanguageModelSession(instructions: """
-                    You are Echo, a friendly iPhone assistant. Decide what the person wants. \
-                    Today is \(Date.now.formatted(date: .complete, time: .shortened)).
-                    """)
+                let session = currentSession()
                 let decision = try await session.respond(to: text, generating: HeyEchoDecision.self).content
+                turns += 1
                 switch decision.kind {
                 case .doTask:         return .doTask(text)
                 case .helpWithScreen: return .helpWithScreen(text)
@@ -53,10 +71,42 @@ struct HeyEchoBrain {
                     return .answer(answer.isEmpty ? "Sorry, I'm not sure about that one." : answer)
                 }
             } catch {
-                // fall through to keywords
+                resetConversation()   // context window full or model busy — start fresh
             }
         }
         return Self.keywordRoute(text)
+    }
+
+    private func currentSession() -> LanguageModelSession {
+        if let session, turns < Self.maxTurns { return session }
+        turns = 0
+        let fresh = LanguageModelSession(instructions: """
+            You are Echo, a friendly iPhone assistant. Decide what the person wants. \
+            Follow-up questions refer to earlier turns in this conversation. \
+            If you don't know something or it needs live data (news, scores, prices), say so honestly \
+            instead of guessing. Today is \(Date.now.formatted(date: .complete, time: .shortened)).
+            \(EchoPersonalContext.text())
+            """)
+        session = fresh
+        return fresh
+    }
+
+    /// Memory and undo commands, matched before any AI runs.
+    static func directRoute(_ text: String) -> HeyEchoRoute? {
+        let lower = text.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: " .!?"))
+        if ["undo", "undo that", "take that back", "never mind undo that", "undo it", "cancel that"].contains(lower) {
+            return .undo
+        }
+        for prefix in ["remember that ", "remember ", "please remember ", "don't forget that "] where lower.hasPrefix(prefix) {
+            let fact = String(text.dropFirst(prefix.count))
+            if fact.lowercased().hasPrefix("to ") { return .doTask("Remind me " + fact) }  // "remember to buy milk"
+            return fact.isEmpty ? nil : .remember(fact)
+        }
+        for prefix in ["forget about ", "forget that ", "forget "] where lower.hasPrefix(prefix) {
+            let what = String(text.dropFirst(prefix.count))
+            return what.isEmpty ? nil : .forget(what)
+        }
+        return nil
     }
 
     /// Simple fallback when Apple Intelligence isn't available.

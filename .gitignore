@@ -56,3 +56,4 @@ build/
 # Provisioning profiles (never commit)
 *.mobileprovision
 *.provisionprofile
+scripts/*.log

@@ -25,6 +25,8 @@ nonisolated struct PreparedGuideImage: Sendable {
     let pixelWidth: Int
     let pixelHeight: Int
     let elements: [ScreenTextElement]
+    /// What Privacy Shield hid before anything left the phone.
+    var hidden: [SensitiveKind] = []
 }
 
 nonisolated enum GuideImageError: Error {
@@ -52,17 +54,35 @@ nonisolated enum ScreenTextReader {
             original.draw(in: CGRect(origin: .zero, size: target))
         }
 
-        guard let jpeg = resized.jpegData(compressionQuality: 0.8),
-              let cgImage = resized.cgImage
-        else { throw GuideImageError.unreadableImage }
+        guard let cgImage = resized.cgImage else { throw GuideImageError.unreadableImage }
 
-        let elements = (try? recognizeText(in: cgImage, limit: maxElements)) ?? []
+        var elements = (try? recognizeText(in: cgImage, limit: maxElements)) ?? []
+        var finalImage = cgImage
+        var hidden: [SensitiveKind] = []
+
+        // Privacy Shield: black out card numbers, SSNs, passwords, keys — on-device, before upload.
+        if PrivacyShield.isEnabled, !elements.isEmpty {
+            let boxes = elements.map { ShieldTextBox(text: $0.text, x: $0.x, y: $0.y, width: $0.width, height: $0.height) }
+            let result = PrivacyShield.scan(boxes)
+            if result.count > 0 {
+                finalImage = PrivacyShield.redact(cgImage, boxes: boxes, result: result)
+                for (index, kind) in result.hidden {
+                    let e = elements[index]
+                    elements[index] = ScreenTextElement(id: e.id, text: kind.placeholder, x: e.x, y: e.y, width: e.width, height: e.height)
+                }
+                hidden = result.kinds
+            }
+        }
+
+        guard let jpeg = PrivacyShield.jpeg(finalImage, quality: 0.8) ?? resized.jpegData(compressionQuality: 0.8)
+        else { throw GuideImageError.unreadableImage }
 
         return PreparedGuideImage(
             jpegData: jpeg,
             pixelWidth: Int(target.width),
             pixelHeight: Int(target.height),
-            elements: elements
+            elements: elements,
+            hidden: hidden
         )
     }
 

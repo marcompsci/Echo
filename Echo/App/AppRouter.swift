@@ -26,6 +26,8 @@ final class AppRouter {
     var showHeyEcho = false
     /// Spoken before Hey Echo starts listening (e.g. when you tap the pet).
     var heyEchoGreeting: String? = nil
+    /// A question or task handed to Hey Echo by a link, Shortcut, or Skill.
+    var heyEchoText: String? = nil
     /// Goal handed to Live Guide (e.g. from Hey Echo).
     var pendingLiveGoal: String? = nil
 

@@ -26,6 +26,15 @@ struct ResultView: View {
             ScrollView {
                 VStack(spacing: EchoSpacing.lg) {
                     imageSection
+                    if let receipt = DevInspector.shared.recentShieldReceipt {
+                        Label(receipt, systemImage: "eye.slash.fill")
+                            .font(.echoFootnote)
+                            .foregroundStyle(.echoTextSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(EchoSpacing.sm)
+                            .background(Color.echoSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.md))
+                    }
                     summarySection
                     stepsSection
                     actionsSection

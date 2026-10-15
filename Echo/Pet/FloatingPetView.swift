@@ -50,6 +50,7 @@ struct FloatingPetView: View {
         .onTapGesture {
             pet.pet()
             router.heyEchoGreeting = UserProfile.helpGreeting
+            router.heyEchoText = nil
             router.showHeyEcho = true
         }
         .contextMenu {
