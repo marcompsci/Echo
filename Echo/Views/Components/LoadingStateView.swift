@@ -1,12 +1,21 @@
 import SwiftUI
 
+// MARK: - Calm "Echo is thinking" state
+//
+// The real orb swirls in its thinking mode while a short line of status text
+// gently cycles, so waiting feels alive instead of stuck.
+
 struct LoadingStateView: View {
     var message: String = "Echo is working on it…"
-    @State private var dotCount = 0
+    var hints: [String] = ["Reading what's on screen…", "Finding the clearest next step…", "Almost there…"]
+
+    @State private var hintIndex = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: EchoSpacing.lg) {
-            EchoOrb(size: 80)
+            EchoOrbView(size: 120)
+                .accessibilityHidden(true)
 
             VStack(spacing: EchoSpacing.xs) {
                 Text(message)
@@ -14,29 +23,23 @@ struct LoadingStateView: View {
                     .foregroundStyle(.echoTextPrimary)
                     .multilineTextAlignment(.center)
 
-                HStack(spacing: 4) {
-                    ForEach(0..<3, id: \.self) { i in
-                        Circle()
-                            .fill(
-                                i < dotCount
-                                    ? AnyShapeStyle(LinearGradient.echoAccent)
-                                    : AnyShapeStyle(Color.echoTextTertiary)
-                            )
-                            .frame(width: 7, height: 7)
-                            .animation(.easeInOut(duration: 0.3).delay(Double(i) * 0.12), value: dotCount)
-                    }
-                }
+                Text(hints.isEmpty ? "" : hints[hintIndex % hints.count])
+                    .font(.echoFootnote)
+                    .foregroundStyle(.echoTextSecondary)
+                    .contentTransition(.opacity)
+                    .id(hintIndex)
+                    .transition(.opacity)
             }
         }
         .padding(EchoSpacing.xl)
-        .onAppear { startPulsing() }
-    }
-
-    private func startPulsing() {
-        Timer.scheduledTimer(withTimeInterval: 0.45, repeats: true) { timer in
-            dotCount = (dotCount + 1) % 4
-            if dotCount == 0 {
-                // brief pause before restart
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .onAppear { EchoVoiceActivity.shared.setMode(.thinking) }
+        .onDisappear { EchoVoiceActivity.shared.setMode(.idle) }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(2.4))
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.4)) { hintIndex += 1 }
             }
         }
     }
@@ -44,7 +47,7 @@ struct LoadingStateView: View {
 
 #Preview {
     ZStack {
-        Color.echoBackground.ignoresSafeArea()
-        LoadingStateView(message: "Echo is looking for the clearest next step…")
+        EchoAmbientBackground()
+        LoadingStateView()
     }
 }

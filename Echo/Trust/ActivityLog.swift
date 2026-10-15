@@ -1,5 +1,6 @@
 import Foundation
 import EventKit
+import WidgetKit
 
 // MARK: - Trust: "What Echo did" + Undo + how much Echo may do on its own
 //
@@ -56,6 +57,10 @@ final class ActivityLog {
 
     func record(_ entry: ActivityEntry) {
         entries.insert(entry, at: 0)
+        if entry.status != .failed {
+            EchoWidgetShared.save(lastAction: entry.summary, at: entry.date)
+            WidgetCenter.shared.reloadTimelines(ofKind: EchoWidgetShared.kind)
+        }
         if entries.count > Self.maxEntries { entries.removeLast(entries.count - Self.maxEntries) }
         save()
     }

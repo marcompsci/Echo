@@ -46,7 +46,7 @@ struct ToolsView: View {
                             .echoGlass(cornerRadius: EchoSpacing.Corner.xl)
                         }
                     }
-                    .padding(.horizontal, EchoSpacing.md)
+                    .padding(.horizontal, EchoSpacing.gutter)
                     .padding(.bottom, EchoSpacing.xxxl)
                 }
                 .scrollIndicators(.hidden)
@@ -125,7 +125,7 @@ struct HeyEchoAccessory: View {
                 Spacer(minLength: 0)
                 Image(systemName: "mic.fill").foregroundStyle(.echoLavender)
             }
-            .padding(.horizontal, EchoSpacing.md)
+            .padding(.horizontal, EchoSpacing.gutter)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

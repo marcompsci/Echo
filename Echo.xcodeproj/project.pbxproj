@@ -128,6 +128,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				EchoWidgetExtension.entitlements,
 			);
 			target = 9D8C7359306607E60082FCFE /* EchoWidgetExtensionExtension */;
 		};
@@ -1186,6 +1187,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X6LZQ3FS36;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = EchoWidgetExtension/EchoWidgetExtension.entitlements;
 				INFOPLIST_FILE = EchoWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = EchoWidgetExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1220,6 +1222,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X6LZQ3FS36;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = EchoWidgetExtension/EchoWidgetExtension.entitlements;
 				INFOPLIST_FILE = EchoWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = EchoWidgetExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

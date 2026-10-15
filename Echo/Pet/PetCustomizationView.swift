@@ -12,7 +12,7 @@ struct PetCustomizationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.echoBackground.ignoresSafeArea()
+                EchoAmbientBackground()
                 ScrollView {
                     VStack(spacing: EchoSpacing.lg) {
                         previewSection
@@ -28,7 +28,6 @@ struct PetCustomizationView: View {
             }
             .navigationTitle("Your Pet")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.echoBackground, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }

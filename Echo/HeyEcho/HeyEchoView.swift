@@ -33,9 +33,17 @@ struct HeyEchoView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color.black, Color.echoLavender.opacity(0.35)],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            // Immersive: always the dark, glowing version of Echo's background.
+            ZStack {
+                Color.black
+                EchoAmbientBackground()
+                RadialGradient(colors: [Color.echoLavender.opacity(0.35), .clear],
+                               center: .center, startRadius: 20, endRadius: 320)
+                    .scaleEffect(phase == .listening ? 1.15 : 0.95)
+                    .animation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: phase)
+            }
+            .ignoresSafeArea()
+            .environment(\.colorScheme, .dark)
 
             VStack(spacing: EchoSpacing.lg) {
                 HStack {
@@ -43,9 +51,11 @@ struct HeyEchoView: View {
                     Button {
                         listener.stop(); narrator.stop(); dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.white.opacity(0.6))
+                        Image(systemName: "xmark")
+                            .font(.echoHeadline)
+                            .foregroundStyle(.white.opacity(0.85))
+                            .frame(width: 40, height: 40)
+                            .echoGlass(cornerRadius: 20, interactive: true)
                     }
                     .accessibilityLabel("Close")
                 }
@@ -56,9 +66,14 @@ struct HeyEchoView: View {
                     .onTapGesture { if phase != .listening { Task { await run() } } }
                     .accessibilityHint("Tap to ask again")
 
-                Text(statusText)
-                    .font(.echoHeadline)
-                    .foregroundStyle(.white.opacity(0.7))
+                Label(statusText, systemImage: statusIcon)
+                    .font(.echoFootnote.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .padding(.horizontal, EchoSpacing.sm)
+                    .padding(.vertical, 6)
+                    .echoGlass(cornerRadius: EchoSpacing.Corner.full)
+                    .contentTransition(.opacity)
+                    .animation(EchoMotion.quick, value: phase)
 
                 Text(phase == .listening ? listener.transcript : (reply.isEmpty ? heard : reply))
                     .font(simpleMode ? .echoTitle : .echoTitle3)
@@ -67,6 +82,7 @@ struct HeyEchoView: View {
                     .padding(.horizontal, EchoSpacing.lg)
                     .frame(minHeight: 80)
                     .animation(.easeInOut, value: listener.transcript)
+                    .contentTransition(.opacity)
 
                 Spacer()
 
@@ -85,8 +101,7 @@ struct HeyEchoView: View {
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, EchoSpacing.lg)
                                     .padding(.vertical, EchoSpacing.sm)
-                                    .background(.white.opacity(0.15))
-                                    .clipShape(Capsule())
+                                    .echoGlass(cornerRadius: EchoSpacing.Corner.full, interactive: true)
                             }
                         }
                         Button {
@@ -97,8 +112,7 @@ struct HeyEchoView: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, EchoSpacing.lg)
                                 .padding(.vertical, EchoSpacing.sm)
-                                .background(.white.opacity(0.15))
-                                .clipShape(Capsule())
+                                .echoGlass(cornerRadius: EchoSpacing.Corner.full, tint: Color.echoLavender.opacity(0.35), interactive: true)
                         }
                     }
                 }
@@ -110,6 +124,8 @@ struct HeyEchoView: View {
             await run(preset: initialText)
         }
         .onDisappear { listener.stop(); narrator.stop(); brain.resetConversation(); EchoPresence.rest() }
+        .environment(\.colorScheme, .dark)
+        .sensoryFeedback(.impact(weight: .light), trigger: phase)
         .sheet(isPresented: $showPlan) {
             if let plan {
                 AgentPlanView(
@@ -118,6 +134,14 @@ struct HeyEchoView: View {
                     onCancel: { showPlan = false; say("Okay, I won't do that.") }
                 )
             }
+        }
+    }
+
+    private var statusIcon: String {
+        switch phase {
+        case .listening: return "waveform"
+        case .thinking:  return "sparkles"
+        case .replying, .done: return "circle.hexagongrid.fill"
         }
     }
 

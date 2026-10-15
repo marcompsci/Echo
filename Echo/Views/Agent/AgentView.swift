@@ -18,7 +18,7 @@ struct AgentView: View {
 
     var body: some View {
         ZStack {
-            Color.echoBackground.ignoresSafeArea()
+            EchoAmbientBackground()
             VStack(spacing: 0) {
                 historyList
                 inputBar
@@ -26,7 +26,6 @@ struct AgentView: View {
         }
         .navigationTitle("Echo Agent")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.echoBackground, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -57,6 +56,7 @@ struct AgentView: View {
             if phase == .planReady { showPlan = true }
         }
         .task { await vm.refreshPermissions() }
+        .sensoryFeedback(.success, trigger: vm.phase == .done)
     }
 
     // MARK: - History + status area
@@ -145,8 +145,7 @@ struct AgentView: View {
                             Spacer()
                         }
                         .padding(EchoSpacing.md)
-                        .background(Color.echoSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                        .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Suggestion: \(s.text)")

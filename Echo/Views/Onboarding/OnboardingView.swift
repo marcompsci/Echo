@@ -106,10 +106,15 @@ struct OnboardingView: View {
 
     /// Echo says hello (by name) the moment onboarding finishes.
     private func finish() {
-        let name = UserProfile.name
-        welcomeNarrator.speak(text: name.isEmpty ? "Hi, I'm Echo. I'm here whenever you need me."
-                                                 : "Hi \(name), I'm Echo. I'm here whenever you need me.")
+        // Open the app first; the welcome is spoken a moment later so nothing can hold up the switch.
+        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
         onComplete()
+        let name = UserProfile.name
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(600))
+            welcomeNarrator.speak(text: name.isEmpty ? "Hi, I'm Echo. I'm here whenever you need me."
+                                                     : "Hi \(name), I'm Echo. I'm here whenever you need me.")
+        }
     }
 }
 
@@ -150,7 +155,6 @@ private struct PageText: View {
 private struct MeetPage: View {
     var body: some View {
         VStack(spacing: EchoSpacing.lg) {
-            Spacer(minLength: EchoSpacing.lg)
             PageText(eyebrow: "Meet Echo",
                      title: "Help for anything\non your iPhone",
                      subtitle: "Show Echo your screen, ask out loud, and it points to exactly what to tap — or does it for you, with your OK.")
@@ -230,6 +234,7 @@ private struct ConnectPage: View {
 // MARK: - 5. Ready
 
 private struct ReadyPage: View {
+    @AppStorage(UserProfile.nameKey) private var userName = ""
     private let ways: [(icon: String, title: String, detail: String)] = [
         ("mic.fill", "Talk", "Tap the orb or say “Hey Siri, Hey Echo”"),
         ("camera.viewfinder", "Show", "Share a screenshot — Echo explains and fixes errors"),
@@ -241,7 +246,7 @@ private struct ReadyPage: View {
         ScrollView {
             VStack(spacing: EchoSpacing.lg) {
                 PageText(eyebrow: "You're all set",
-                         title: UserProfile.name.isEmpty ? "Ready when you are" : "Ready, \(UserProfile.name)",
+                         title: userName.trimmingCharacters(in: .whitespaces).isEmpty ? "Ready when you are" : "Ready, \(userName.trimmingCharacters(in: .whitespaces))",
                          subtitle: "Here's how to use Echo.")
                 VStack(spacing: 0) {
                     ForEach(Array(ways.enumerated()), id: \.offset) { i, way in

@@ -22,7 +22,7 @@ struct AnalyzeView: View {
 
     var body: some View {
         ZStack {
-            Color.echoBackground.ignoresSafeArea()
+            EchoAmbientBackground()
 
             switch vm.phase {
             case .analyzing:
@@ -39,7 +39,6 @@ struct AnalyzeView: View {
         .animation(.easeInOut(duration: 0.3), value: vm.phase.isAnalyzing)
         .navigationTitle("Analyze")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.echoBackground, for: .navigationBar)
         .onAppear { vm.setImage(imageData) }
         .onChange(of: vm.phase) { _, phase in
             if case .done = phase, let session = vm.savedSession, let response = vm.result {
@@ -101,7 +100,8 @@ struct AnalyzeView: View {
 
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg)
-                    .fill(Color.echoSurface)
+                    .fill(Color.clear)
+                    .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
                     .overlay(
                         RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg)
                             .strokeBorder(

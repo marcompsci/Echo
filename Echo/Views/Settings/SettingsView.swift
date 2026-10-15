@@ -49,7 +49,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarBackground(Color.echoBackground, for: .navigationBar)
             .toolbar {
                 if showsDone {
                     ToolbarItem(placement: .confirmationAction) {
@@ -453,7 +452,7 @@ private struct PrivacyInfoView: View {
 
     var body: some View {
         ZStack {
-            Color.echoBackground.ignoresSafeArea()
+            EchoAmbientBackground()
             ScrollView {
                 VStack(spacing: EchoSpacing.md) {
                     ForEach(points, id: \.title) { point in
@@ -474,8 +473,7 @@ private struct PrivacyInfoView: View {
                         }
                         .padding(EchoSpacing.md)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.echoSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                        .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
                     }
                 }
                 .padding(EchoSpacing.md)
@@ -483,7 +481,6 @@ private struct PrivacyInfoView: View {
         }
         .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.echoBackground, for: .navigationBar)
     }
 }
 

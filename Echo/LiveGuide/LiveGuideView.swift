@@ -12,7 +12,7 @@ struct LiveGuideView: View {
 
     var body: some View {
         ZStack {
-            Color.echoBackground.ignoresSafeArea()
+            EchoAmbientBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: EchoSpacing.lg) {
                     header
@@ -30,7 +30,6 @@ struct LiveGuideView: View {
         }
         .navigationTitle("Live Guide")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.echoBackground, for: .navigationBar)
         .onAppear {
             vm.startObserving()
             if let goal = router.pendingLiveGoal {
@@ -79,8 +78,7 @@ struct LiveGuideView: View {
                 .font(.echoBody)
                 .lineLimit(1...3)
                 .padding(EchoSpacing.md)
-                .background(Color.echoSurface)
-                .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
                 .focused($goalFocused)
                 .submitLabel(.done)
                 .onSubmit { Task { await vm.prepare(speakAloud: speakAloud) } }
@@ -113,8 +111,7 @@ struct LiveGuideView: View {
                         .foregroundStyle(.echoTextTertiary)
                 }
                 .padding(EchoSpacing.md)
-                .background(Color.echoSurface)
-                .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
             }
             if let message = vm.agentResultMessage {
                 Label(message, systemImage: "checkmark.seal")
@@ -184,8 +181,7 @@ struct LiveGuideView: View {
                 }
                 .padding(EchoSpacing.md)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.echoSurface)
-                .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
             }
 
             if session.steps.count > 1 {

@@ -18,7 +18,7 @@ struct HomeRootView: View {
                 ToolsView()
             }
             Tab("Activity", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90", value: EchoTab.activity) {
-                NavigationStack { ActivityLogView() }
+                NavigationStack { ActivityLogView(asTab: true) }
             }
             Tab("Settings", systemImage: "gearshape.fill", value: EchoTab.settings) {
                 SettingsView(showsDone: false)

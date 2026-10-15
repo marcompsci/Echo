@@ -13,7 +13,7 @@ struct AgentPlanView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.echoBackground.ignoresSafeArea()
+                EchoAmbientBackground()
                 ScrollView {
                     VStack(spacing: EchoSpacing.lg) {
                         headerSection
@@ -28,7 +28,6 @@ struct AgentPlanView: View {
             }
             .navigationTitle("Review Plan")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.echoBackground, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { onCancel() }
@@ -191,8 +190,7 @@ private struct AgentActionRow: View {
                 }
             }
             .padding(EchoSpacing.md)
-            .background(Color.echoSurface)
-            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+            .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(action.summary)

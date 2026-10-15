@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 @main
 struct EchoApp: App {
@@ -30,7 +31,11 @@ struct EchoApp: App {
                 }
             }
             .preferredColorScheme((EchoAppearance(rawValue: appearanceRaw) ?? .system).colorScheme)
-            .task { EchoPresence.start() }
+            .task {
+                EchoPresence.start()
+                EchoWidgetShared.save(userName: UserProfile.name)
+                WidgetCenter.shared.reloadTimelines(ofKind: EchoWidgetShared.kind)
+            }
             .onOpenURL { url in
                 handleIncomingURL(url)
             }

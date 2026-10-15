@@ -42,7 +42,7 @@ struct HomeView: View {
                     recentSection
                     privacyFooter
                 }
-                .padding(.horizontal, EchoSpacing.md)
+                .padding(.horizontal, EchoSpacing.gutter)
                 .padding(.top, EchoSpacing.sm)
                 .padding(.bottom, EchoSpacing.xxxl)
                 .opacity(appeared ? 1 : 0)
@@ -157,10 +157,10 @@ struct HomeView: View {
                     .accessibilityHint("Asks Echo this")
                 }
             }
-            .padding(.horizontal, EchoSpacing.md)
+            .padding(.horizontal, EchoSpacing.gutter)
         }
         .scrollIndicators(.hidden)
-        .padding(.horizontal, -EchoSpacing.md)
+        .padding(.horizontal, -EchoSpacing.gutter)
     }
 
     // MARK: Action grid
@@ -251,10 +251,10 @@ struct HomeView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, EchoSpacing.md)
+                    .padding(.horizontal, EchoSpacing.gutter)
                 }
                 .scrollIndicators(.hidden)
-                .padding(.horizontal, -EchoSpacing.md)
+                .padding(.horizontal, -EchoSpacing.gutter)
             }
         }
     }
@@ -360,7 +360,7 @@ private struct HowItWorksSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.echoBackground.ignoresSafeArea()
+                EchoAmbientBackground()
                 ScrollView {
                     VStack(spacing: EchoSpacing.lg) {
                         EchoOrb(size: 72).padding(.top, EchoSpacing.lg)
@@ -383,18 +383,16 @@ private struct HowItWorksSheet: View {
                                 }
                                 .padding(EchoSpacing.md)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.echoSurface)
-                                .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                                .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
                             }
                         }
-                        .padding(.horizontal, EchoSpacing.md)
+                        .padding(.horizontal, EchoSpacing.gutter)
                     }
                     .padding(.bottom, EchoSpacing.xxl)
                 }
             }
             .navigationTitle("How Echo works")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.echoBackground, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }.foregroundStyle(.echoLavender)

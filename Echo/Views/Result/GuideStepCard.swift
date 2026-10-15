@@ -38,19 +38,14 @@ struct GuideStepCard: View {
                 Spacer(minLength: 0)
             }
             .padding(EchoSpacing.md)
-            .background(isSelected ? Color.echoSurfaceElevated : Color.echoSurface)
-            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl))
+            .echoGlass(cornerRadius: EchoSpacing.Corner.xl, tint: isSelected ? Color.echoLavender.opacity(0.14) : nil)
             .overlay(
-                RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl)
-                    .strokeBorder(
-                        isSelected
-                            ? AnyShapeStyle(LinearGradient.echoAccentSubtle)
-                            : AnyShapeStyle(Color.echoSeparator),
-                        lineWidth: isSelected ? 2 : 1
-                    )
+                RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl, style: .continuous)
+                    .strokeBorder(isSelected ? AnyShapeStyle(LinearGradient.echoAccent) : AnyShapeStyle(Color.clear), lineWidth: 1.5)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.echoPress)
+        .sensoryFeedback(.selection, trigger: isSelected)
         .animation(.spring(duration: 0.3), value: isSelected)
         .accessibilityLabel("Step \(step.number): \(step.title)")
         .accessibilityHint(isSelected ? step.detail : "Tap to expand")

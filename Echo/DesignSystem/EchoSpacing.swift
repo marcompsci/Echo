@@ -11,6 +11,8 @@ enum EchoSpacing {
     static let xl:   CGFloat = 32
     static let xxl:  CGFloat = 48
     static let xxxl: CGFloat = 64
+    /// Screen edge margin — matches iOS large titles.
+    static let gutter: CGFloat = 20
 
     enum Corner {
         static let sm:   CGFloat =  8

@@ -11,6 +11,7 @@ struct ResultView: View {
     @State private var vm: ResultViewModel
     @State private var showImageFullscreen = false
     @State private var narrator = GuideNarrator()
+    @State private var arrived = false
     @AppStorage(GuideNarrator.autoSpeakKey) private var speakAloud = true
 
     init(session: EchoSession, response: GuideResponse, imageData: Data?) {
@@ -22,7 +23,7 @@ struct ResultView: View {
 
     var body: some View {
         ZStack {
-            Color.echoBackground.ignoresSafeArea()
+            EchoAmbientBackground()
             ScrollView {
                 VStack(spacing: EchoSpacing.lg) {
                     ErrorDoctorCard(imageData: imageData, willSpeak: { narrator.stop() })
@@ -33,8 +34,7 @@ struct ResultView: View {
                             .foregroundStyle(.echoTextSecondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(EchoSpacing.sm)
-                            .background(Color.echoSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.md))
+                            .echoGlass(cornerRadius: EchoSpacing.Corner.md)
                     }
                     summarySection
                     stepsSection
@@ -46,7 +46,11 @@ struct ResultView: View {
                 .padding(.bottom, EchoSpacing.xxxl)
             }
         }
-        .onAppear { if speakAloud { narrator.speak(response) } }
+        .onAppear {
+            arrived = true
+            if speakAloud { narrator.speak(response) }
+        }
+        .sensoryFeedback(.success, trigger: arrived)
         .onDisappear { narrator.stop() }
         .onChange(of: narrator.currentStepIndex) { _, index in
             withAnimation { vm.focusStep(index) }
@@ -65,7 +69,6 @@ struct ResultView: View {
         }
         .navigationTitle("Echo's Guide")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.echoBackground, for: .navigationBar)
         .navigationBarBackButtonHidden(false)
         // Action confirmation
         .confirmationDialog(

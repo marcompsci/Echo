@@ -3,6 +3,8 @@ import SwiftUI
 // MARK: - What Echo Did (activity log with Undo)
 
 struct ActivityLogView: View {
+    /// "Activity" with a large title when shown as a tab.
+    var asTab = false
     @State private var log = ActivityLog.shared
     @AppStorage(EchoAutonomy.storageKey) private var autonomyRaw = EchoAutonomy.askEveryTime.rawValue
     @State private var confirmClear = false
@@ -74,8 +76,8 @@ struct ActivityLogView: View {
         }
         .scrollContentBackground(.hidden)
         .echoScreenBackground()
-        .navigationTitle("Trust & Undo")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(asTab ? "Activity" : "Trust & Undo")
+        .navigationBarTitleDisplayMode(asTab ? .large : .inline)
         .confirmationDialog("Clear Echo's activity history? (This doesn't undo anything.)", isPresented: $confirmClear, titleVisibility: .visible) {
             Button("Clear history", role: .destructive) { log.clear() }
         }

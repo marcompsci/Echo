@@ -13,13 +13,8 @@ struct EchoCard<Content: View>: View {
 
     var body: some View {
         content
-            .background(elevated ? Color.echoSurfaceElevated : Color.echoSurface)
-            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl))
-            .shadow(
-                color: Color.black.opacity(EchoSpacing.Shadow.softOpacity),
-                radius: EchoSpacing.Shadow.softRadius,
-                y: EchoSpacing.Shadow.softY
-            )
+            .echoGlass(cornerRadius: EchoSpacing.Corner.xl,
+                       tint: elevated ? Color.echoLavender.opacity(0.10) : nil)
     }
 }
 

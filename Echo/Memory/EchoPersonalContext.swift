@@ -31,12 +31,17 @@ nonisolated enum EchoVoicePrefs {
     /// The voice the person picked, or the best installed voice for their language.
     static func voice() -> AVSpeechSynthesisVoice? {
         if let id = voiceIdentifier, let v = AVSpeechSynthesisVoice(identifier: id) { return v }
+        return bestDefaultVoice
+    }
+
+    /// Looking up every installed voice is slow, so do it once.
+    private static let bestDefaultVoice: AVSpeechSynthesisVoice? = {
         let lang = AVSpeechSynthesisVoice.currentLanguageCode()
         let candidates = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == lang }
         return candidates.first(where: { $0.quality == .premium })
             ?? candidates.first(where: { $0.quality == .enhanced })
             ?? AVSpeechSynthesisVoice(language: lang)
-    }
+    }()
 
     /// Installed voices for the person's language, best first.
     static func availableVoices() -> [AVSpeechSynthesisVoice] {

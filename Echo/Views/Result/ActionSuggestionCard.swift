@@ -34,8 +34,7 @@ struct ActionSuggestionCard: View {
                     .accessibilityHidden(true)
             }
             .padding(EchoSpacing.md)
-            .background(Color.echoSurface)
-            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl))
+            .echoGlass(cornerRadius: EchoSpacing.Corner.xl)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(action.title)

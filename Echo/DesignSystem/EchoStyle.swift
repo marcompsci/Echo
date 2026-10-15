@@ -24,6 +24,7 @@ extension Font {
 struct EchoAmbientBackground: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @State private var drift = false
 
     var body: some View {
@@ -34,11 +35,13 @@ struct EchoAmbientBackground: View {
                 .frame(width: 420, height: 420)
                 .blur(radius: 120)
                 .offset(x: drift ? -120 : -60, y: drift ? -300 : -240)
+                .opacity(reduceTransparency ? 0 : 1)
             Circle()
                 .fill(Color.echoMint.opacity(scheme == .dark ? 0.18 : 0.16))
                 .frame(width: 360, height: 360)
                 .blur(radius: 130)
                 .offset(x: drift ? 150 : 90, y: drift ? 60 : 140)
+                .opacity(reduceTransparency ? 0 : 1)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
@@ -56,10 +59,17 @@ struct EchoGlass: ViewModifier {
     var cornerRadius: CGFloat = EchoSpacing.Corner.xl
     var tint: Color? = nil
     var interactive = false
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        if #available(iOS 26.0, *) {
+        if reduceTransparency || contrast == .increased {
+            // Accessibility: solid, high-contrast surfaces instead of glass.
+            content
+                .background(Color.echoSurface, in: shape)
+                .overlay(shape.stroke(Color.echoTextTertiary.opacity(contrast == .increased ? 0.6 : 0.2)))
+        } else if #available(iOS 26.0, *) {
             content.glassEffect(interactive ? .regular.tint(tint).interactive() : .regular.tint(tint), in: shape)
         } else {
             content
