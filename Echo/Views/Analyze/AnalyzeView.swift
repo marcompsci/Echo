@@ -40,7 +40,6 @@ struct AnalyzeView: View {
         .navigationTitle("Analyze")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color.echoBackground, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear { vm.setImage(imageData) }
         .onChange(of: vm.phase) { _, phase in
             if case .done = phase, let session = vm.savedSession, let response = vm.result {

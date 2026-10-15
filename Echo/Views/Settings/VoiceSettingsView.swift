@@ -67,7 +67,7 @@ struct VoiceSettingsView: View {
             .listRowBackground(Color.echoSurface)
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("Voice & Simple Mode")
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { narrator.stop() }

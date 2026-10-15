@@ -4,6 +4,8 @@ import AVFAudio
 import Speech
 
 struct SettingsView: View {
+    /// False when Settings is a tab (no Done button).
+    var showsDone = true
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss)      private var dismiss
     @Environment(PetState.self)  private var petState
@@ -15,6 +17,7 @@ struct SettingsView: View {
     @AppStorage(UserProfile.nameKey) private var userName = ""
     @AppStorage(EchoPresence.enabledKey) private var presenceEnabled = false
     @AppStorage(DevInspector.enabledKey) private var developerMode = false
+    @AppStorage(EchoAppearance.storageKey) private var appearanceRaw = EchoAppearance.system.rawValue
     @State private var shieldOn = PrivacyShield.isEnabled
     @State private var memory = EchoMemory.shared
     @State private var skills = EchoSkillStore.shared
@@ -29,7 +32,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.echoBackground.ignoresSafeArea()
+                EchoAmbientBackground()
                 List {
                     accountSection
                     intelligenceSection
@@ -47,11 +50,12 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(Color.echoBackground, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                        .foregroundStyle(.echoLavender)
+                if showsDone {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                            .foregroundStyle(.echoLavender)
+                    }
                 }
             }
             .onAppear { vm.refresh() }
@@ -220,6 +224,11 @@ struct SettingsView: View {
 
     private var accountSection: some View {
         Section("Account") {
+            Picker(selection: $appearanceRaw) {
+                ForEach(EchoAppearance.allCases) { Text($0.title).tag($0.rawValue) }
+            } label: {
+                Label("Appearance", systemImage: "circle.lefthalf.filled")
+            }
             TextField("Your name (Echo greets you with it)", text: $userName)
                 .textContentType(.givenName)
             ConnectAccountsView()
@@ -475,7 +484,6 @@ private struct PrivacyInfoView: View {
         .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color.echoBackground, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 

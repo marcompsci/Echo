@@ -6,6 +6,7 @@ struct EchoApp: App {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var router = AppRouter()
     @State private var petState = PetState()
+    @AppStorage(EchoAppearance.storageKey) private var appearanceRaw = EchoAppearance.system.rawValue
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([EchoSession.self])
@@ -28,6 +29,7 @@ struct EchoApp: App {
                     OnboardingView(onComplete: { hasSeenOnboarding = true })
                 }
             }
+            .preferredColorScheme((EchoAppearance(rawValue: appearanceRaw) ?? .system).colorScheme)
             .task { EchoPresence.start() }
             .onOpenURL { url in
                 handleIncomingURL(url)

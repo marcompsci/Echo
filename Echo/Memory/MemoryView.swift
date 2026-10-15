@@ -65,7 +65,7 @@ struct MemoryView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("What Echo Remembers")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Edit memory", isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {

@@ -51,7 +51,7 @@ struct PhotoCleanupView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("Photo Cleanup")
         .navigationBarTitleDisplayMode(.inline)
         .task { if model.state == .idle { await model.scan() } }
@@ -84,7 +84,7 @@ struct PhotoBucketView: View {
             }
             .padding(4)
         }
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle(bucket.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

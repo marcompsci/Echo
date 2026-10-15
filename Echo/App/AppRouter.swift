@@ -13,10 +13,15 @@ enum EchoRoute: Hashable {
     case fileCleanup
 }
 
+enum EchoTab: Hashable {
+    case home, tools, activity, settings
+}
+
 @Observable
 @MainActor
 final class AppRouter {
     var path = NavigationPath()
+    var selectedTab: EchoTab = .home
 
     // Shared state between Analyze → Result
     var pendingImageData: Data?      = nil
@@ -24,7 +29,15 @@ final class AppRouter {
     var currentSession: EchoSession? = nil
 
     // Modal sheets
-    var showSettings = false
+    /// Older call sites ask to "show settings" — that now switches to the Settings tab.
+    var showSettings = false {
+        didSet {
+            if showSettings {
+                selectedTab = .settings
+                showSettings = false
+            }
+        }
+    }
     var showHeyEcho = false
     /// Spoken before Hey Echo starts listening (e.g. when you tap the pet).
     var heyEchoGreeting: String? = nil
@@ -34,6 +47,7 @@ final class AppRouter {
     var pendingLiveGoal: String? = nil
 
     func navigateToAnalyze(imageData: Data) {
+        selectedTab = .home
         pendingImageData = imageData
         path.append(EchoRoute.analyze)
     }
@@ -45,10 +59,12 @@ final class AppRouter {
     }
 
     func navigateToAgent() {
+        selectedTab = .home
         path.append(EchoRoute.agent)
     }
 
     func navigateToLiveGuide() {
+        selectedTab = .home
         path.append(EchoRoute.liveGuide)
     }
 

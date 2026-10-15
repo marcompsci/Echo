@@ -4,11 +4,12 @@ struct PrivacyPromiseCard: View {
     private let promises: [(icon: String, text: String)] = [
         ("eye.slash", "No background screen watching"),
         ("mic.slash", "No silent microphone recording"),
-        ("trash", "Delete sessions whenever you want")
+        ("lock.shield", "Privacy Shield hides card numbers & passwords"),
+        ("hand.raised", "Nothing deleted or bought without your OK")
     ]
 
     var body: some View {
-        EchoCard {
+        Group {
             VStack(alignment: .leading, spacing: EchoSpacing.md) {
                 Label {
                     Text("Echo's privacy promise")
@@ -38,6 +39,7 @@ struct PrivacyPromiseCard: View {
                 }
             }
             .padding(EchoSpacing.lg)
+            .echoGlass(cornerRadius: EchoSpacing.Corner.xl)
         }
     }
 }

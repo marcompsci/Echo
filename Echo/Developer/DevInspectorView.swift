@@ -71,7 +71,7 @@ struct DevInspectorView: View {
             .listRowBackground(Color.echoSurface)
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("Developer")
         .navigationBarTitleDisplayMode(.inline)
     }

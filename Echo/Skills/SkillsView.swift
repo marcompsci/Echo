@@ -68,7 +68,7 @@ struct SkillsView: View {
             .listRowBackground(Color.echoSurface)
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("Echo Skills")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $editing) { skill in

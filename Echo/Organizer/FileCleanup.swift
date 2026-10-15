@@ -216,7 +216,7 @@ struct FileCleanupView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("File Cleanup")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {

@@ -1,42 +1,106 @@
 import SwiftUI
 
+// MARK: - Onboarding (calm & premium)
+//
+// One glowing orb stays on screen the whole time and gently changes size as
+// you move through: Meet Echo → Privacy → Your name → Connect → Ready.
+// Every page has a clear button, a Back, and soft haptics.
+
 struct OnboardingView: View {
     var onComplete: () -> Void
     @State private var page = 0
+    @AppStorage(UserProfile.nameKey) private var userName = ""
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private let pageCount = 5
 
     var body: some View {
         ZStack {
-            Color.echoBackground.ignoresSafeArea()
+            EchoAmbientBackground()
 
             VStack(spacing: 0) {
+                topBar
+                    .padding(.horizontal, EchoSpacing.md)
+                    .padding(.top, EchoSpacing.xs)
+
+                EchoOrbView(size: orbSize)
+                    .padding(.top, page == 0 ? EchoSpacing.xxl : EchoSpacing.md)
+                    .animation(reduceMotion ? nil : EchoMotion.spring, value: page)
+                    .accessibilityHidden(true)
+
                 TabView(selection: $page) {
-                    OnboardingPage1().tag(0)
-                    OnboardingPage2().tag(1)
-                    OnboardingNamePage(onNext: { page = 3 }).tag(2)
-                    OnboardingConnectPage(onNext: { page = 4 }).tag(3)
-                    OnboardingPage3(onComplete: finish).tag(4)
+                    MeetPage().tag(0)
+                    PrivacyPage().tag(1)
+                    NamePage(onNext: next).tag(2)
+                    ConnectPage().tag(3)
+                    ReadyPage().tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(reduceMotion ? .none : .easeInOut(duration: 0.35), value: page)
+                .animation(reduceMotion ? nil : EchoMotion.spring, value: page)
 
-                // Page indicator
-                HStack(spacing: 8) {
-                    ForEach(0..<5, id: \.self) { i in
-                        Capsule()
-                            .fill(
-                                i == page
-                                    ? AnyShapeStyle(LinearGradient.echoAccent)
-                                    : AnyShapeStyle(Color.echoTextTertiary)
-                            )
-                            .frame(width: i == page ? 24 : 8, height: 8)
-                            .animation(.spring(duration: 0.35), value: page)
-                    }
-                }
-                .padding(.bottom, EchoSpacing.xxl)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Page \(page + 1) of 5")
+                EchoButton(buttonTitle, systemImage: page == pageCount - 1 ? "sparkles" : nil) { next() }
+                    .padding(.horizontal, EchoSpacing.lg)
+                    .padding(.bottom, EchoSpacing.lg)
+                    .accessibilityHint(page == pageCount - 1 ? "Opens Echo" : "Next page")
             }
+        }
+        .sensoryFeedback(.selection, trigger: page)
+    }
+
+    private var orbSize: CGFloat {
+        switch page {
+        case 0: return 180
+        case 4: return 150
+        default: return 96
+        }
+    }
+
+    private var buttonTitle: String {
+        switch page {
+        case 0: return "Get started"
+        case 2: return userName.trimmingCharacters(in: .whitespaces).isEmpty ? "Skip" : "Continue"
+        case 3: return AccountService.shared.isSignedIn ? "Continue" : "Skip for now"
+        case 4: return "Start using Echo"
+        default: return "Continue"
+        }
+    }
+
+    private var topBar: some View {
+        HStack {
+            Button {
+                withAnimation(EchoMotion.spring) { page = max(0, page - 1) }
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.echoHeadline)
+                    .foregroundStyle(.echoTextSecondary)
+                    .frame(width: 36, height: 36)
+                    .echoGlass(cornerRadius: 18)
+            }
+            .opacity(page == 0 ? 0 : 1)
+            .disabled(page == 0)
+            .accessibilityLabel("Back")
+
+            Spacer()
+            HStack(spacing: 6) {
+                ForEach(0..<pageCount, id: \.self) { i in
+                    Capsule()
+                        .fill(i <= page ? AnyShapeStyle(LinearGradient.echoAccent) : AnyShapeStyle(Color.echoTextTertiary.opacity(0.4)))
+                        .frame(width: i == page ? 22 : 7, height: 7)
+                }
+            }
+            .animation(EchoMotion.spring, value: page)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Step \(page + 1) of \(pageCount)")
+            Spacer()
+            AppearanceToggle()
+        }
+    }
+
+    private func next() {
+        if page < pageCount - 1 {
+            withAnimation(EchoMotion.spring) { page += 1 }
+        } else {
+            finish()
         }
     }
 
@@ -52,199 +116,157 @@ struct OnboardingView: View {
 /// Kept outside the view so the greeting keeps playing after onboarding closes.
 @MainActor private let welcomeNarrator = GuideNarrator()
 
-// MARK: - Page: connect an account
+// MARK: - Shared page layout
 
-private struct OnboardingConnectPage: View {
-    var onNext: () -> Void
-    @State private var accounts = AccountService.shared
+private struct PageText: View {
+    let eyebrow: String
+    let title: String
+    let subtitle: String
 
     var body: some View {
-        VStack(spacing: EchoSpacing.lg) {
-            Spacer()
-            Image(systemName: "person.crop.circle.badge.checkmark")
-                .font(.system(size: 64))
-                .foregroundStyle(LinearGradient.echoAccent)
-                .accessibilityHidden(true)
-            VStack(spacing: EchoSpacing.sm) {
-                Text("Connect your account")
-                    .font(.echoTitle)
-                    .foregroundStyle(.echoTextPrimary)
-                Text("Keep your guides and settings with you.\nYou can skip this and connect later in Settings.")
-                    .font(.echoCallout)
-                    .foregroundStyle(.echoTextSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            ConnectAccountsView(onDone: onNext)
-            Spacer()
-            EchoButton(accounts.isSignedIn ? "Next" : "Skip for now") { onNext() }
-            Spacer().frame(height: EchoSpacing.lg)
+        VStack(spacing: EchoSpacing.sm) {
+            Text(eyebrow.uppercased())
+                .font(.echoEyebrow)
+                .tracking(1.4)
+                .foregroundStyle(.echoLavender)
+            Text(title)
+                .font(.echoDisplay)
+                .foregroundStyle(.echoTextPrimary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(subtitle)
+                .font(.echoCallout)
+                .foregroundStyle(.echoTextSecondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, EchoSpacing.lg)
     }
 }
 
-// MARK: - Page: your name
+// MARK: - 1. Meet Echo
 
-private struct OnboardingNamePage: View {
+private struct MeetPage: View {
+    var body: some View {
+        VStack(spacing: EchoSpacing.lg) {
+            Spacer(minLength: EchoSpacing.lg)
+            PageText(eyebrow: "Meet Echo",
+                     title: "Help for anything\non your iPhone",
+                     subtitle: "Show Echo your screen, ask out loud, and it points to exactly what to tap — or does it for you, with your OK.")
+            Spacer()
+        }
+    }
+}
+
+// MARK: - 2. Privacy
+
+private struct PrivacyPage: View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: EchoSpacing.lg) {
+                PageText(eyebrow: "Your privacy",
+                         title: "You choose what\nEcho sees",
+                         subtitle: "Echo only looks at screenshots and questions you share on purpose.")
+                PrivacyPromiseCard()
+                    .padding(.horizontal, EchoSpacing.lg)
+            }
+            .padding(.top, EchoSpacing.lg)
+        }
+        .scrollIndicators(.hidden)
+    }
+}
+
+// MARK: - 3. Your name
+
+private struct NamePage: View {
     var onNext: () -> Void
     @AppStorage(UserProfile.nameKey) private var userName = ""
     @FocusState private var focused: Bool
 
     var body: some View {
-        VStack(spacing: EchoSpacing.xl) {
-            Spacer()
-            EchoOrbView(size: 130)
-            VStack(spacing: EchoSpacing.sm) {
-                Text("What should Echo\ncall you?")
-                    .font(.echoTitle)
-                    .foregroundStyle(.echoTextPrimary)
-                    .multilineTextAlignment(.center)
-                Text("Echo will greet you by name.")
-                    .font(.echoCallout)
-                    .foregroundStyle(.echoTextSecondary)
-            }
+        VStack(spacing: EchoSpacing.lg) {
+            PageText(eyebrow: "Say hello",
+                     title: "What should Echo\ncall you?",
+                     subtitle: "Echo greets you by name when you tap it.")
             TextField("Your first name", text: $userName)
                 .font(.echoTitle3)
                 .multilineTextAlignment(.center)
                 .textContentType(.givenName)
                 .submitLabel(.next)
                 .padding(EchoSpacing.md)
-                .background(Color.echoSurface)
-                .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                .echoGlass(cornerRadius: EchoSpacing.Corner.lg)
                 .focused($focused)
                 .onSubmit { focused = false; onNext() }
+                .padding(.horizontal, EchoSpacing.lg)
             Spacer()
-            EchoButton(userName.trimmingCharacters(in: .whitespaces).isEmpty ? "Skip" : "Next") {
-                focused = false
-                onNext()
-            }
-            Spacer().frame(height: EchoSpacing.lg)
         }
-        .padding(.horizontal, EchoSpacing.lg)
+        .padding(.top, EchoSpacing.lg)
+        .contentShape(Rectangle())
+        .onTapGesture { focused = false }
     }
 }
 
-// MARK: - Page 1: Meet Echo
+// MARK: - 4. Connect
 
-private struct OnboardingPage1: View {
+private struct ConnectPage: View {
     var body: some View {
-        VStack(spacing: EchoSpacing.xl) {
-            Spacer()
-
-            EchoOrb(size: 140)
-
-            VStack(spacing: EchoSpacing.sm) {
-                Text("Meet Echo")
-                    .font(.echoLargeTitle)
-                    .foregroundStyle(.echoTextPrimary)
-                    .multilineTextAlignment(.center)
-
-                Text("A clearer way to understand\nwhat's on your screen.")
-                    .font(.echoCallout)
-                    .foregroundStyle(.echoTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
+        ScrollView {
+            VStack(spacing: EchoSpacing.lg) {
+                PageText(eyebrow: "Optional",
+                         title: "Connect an account",
+                         subtitle: "Keep your guides and settings with you. You can do this later in Settings.")
+                ConnectAccountsView(onDone: {})
+                    .padding(EchoSpacing.md)
+                    .echoGlass(cornerRadius: EchoSpacing.Corner.xl)
+                    .padding(.horizontal, EchoSpacing.lg)
             }
-
-            Spacer()
-            Spacer()
+            .padding(.top, EchoSpacing.lg)
         }
-        .padding(.horizontal, EchoSpacing.xl)
+        .scrollIndicators(.hidden)
     }
 }
 
-// MARK: - Page 2: Privacy
+// MARK: - 5. Ready
 
-private struct OnboardingPage2: View {
-    var body: some View {
-        VStack(spacing: EchoSpacing.xl) {
-            Spacer()
-
-            Image(systemName: "hand.raised.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(LinearGradient.echoAccent)
-                .accessibilityHidden(true)
-
-            VStack(spacing: EchoSpacing.sm) {
-                Text("You choose what\nEcho sees")
-                    .font(.echoTitle)
-                    .foregroundStyle(.echoTextPrimary)
-                    .multilineTextAlignment(.center)
-
-                Text("Echo only analyzes screenshots, photos,\nand questions you deliberately share.")
-                    .font(.echoCallout)
-                    .foregroundStyle(.echoTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-
-            PrivacyPromiseCard()
-
-            Spacer()
-        }
-        .padding(.horizontal, EchoSpacing.lg)
-    }
-}
-
-// MARK: - Page 3: Ask. See. Do.
-
-private struct OnboardingPage3: View {
-    var onComplete: () -> Void
-    @State private var iconScale = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private let steps: [(icon: String, label: String)] = [
-        ("photo.badge.plus", "Share a screenshot"),
-        ("text.bubble", "Ask a question"),
-        ("sparkles", "Get a visual next step")
+private struct ReadyPage: View {
+    private let ways: [(icon: String, title: String, detail: String)] = [
+        ("mic.fill", "Talk", "Tap the orb or say “Hey Siri, Hey Echo”"),
+        ("camera.viewfinder", "Show", "Share a screenshot — Echo explains and fixes errors"),
+        ("dot.radiowaves.left.and.right", "Guide", "Live Guide watches and tells you each tap"),
+        ("checkmark.shield", "Stay in control", "Echo asks before it does anything")
     ]
 
     var body: some View {
-        VStack(spacing: EchoSpacing.xl) {
-            Spacer()
-
-            VStack(spacing: EchoSpacing.sm) {
-                Text("Ask. See. Do.")
-                    .font(.echoLargeTitle)
-                    .foregroundStyle(.echoTextPrimary)
-                    .multilineTextAlignment(.center)
-
-                Text("Share a screen, ask a question,\nand get a visual next step.")
-                    .font(.echoCallout)
-                    .foregroundStyle(.echoTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-
-            HStack(spacing: EchoSpacing.lg) {
-                ForEach(steps, id: \.label) { step in
-                    VStack(spacing: EchoSpacing.xs) {
-                        Image(systemName: step.icon)
-                            .font(.system(size: 32))
-                            .foregroundStyle(LinearGradient.echoAccent)
-                            .accessibilityHidden(true)
-                        Text(step.label)
-                            .font(.echoCaption)
-                            .foregroundStyle(.echoTextSecondary)
-                            .multilineTextAlignment(.center)
+        ScrollView {
+            VStack(spacing: EchoSpacing.lg) {
+                PageText(eyebrow: "You're all set",
+                         title: UserProfile.name.isEmpty ? "Ready when you are" : "Ready, \(UserProfile.name)",
+                         subtitle: "Here's how to use Echo.")
+                VStack(spacing: 0) {
+                    ForEach(Array(ways.enumerated()), id: \.offset) { i, way in
+                        HStack(spacing: EchoSpacing.md) {
+                            Image(systemName: way.icon)
+                                .font(.echoHeadline)
+                                .foregroundStyle(.echoLavender)
+                                .frame(width: 32, height: 32)
+                                .background(Color.echoLavender.opacity(0.14), in: Circle())
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(way.title).font(.echoHeadline).foregroundStyle(.echoTextPrimary)
+                                Text(way.detail).font(.echoCaption).foregroundStyle(.echoTextSecondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(EchoSpacing.md)
+                        if i < ways.count - 1 { Divider().padding(.leading, 64) }
                     }
-                    .frame(maxWidth: .infinity)
                 }
+                .echoGlass(cornerRadius: EchoSpacing.Corner.xl)
+                .padding(.horizontal, EchoSpacing.lg)
             }
-            .padding(EchoSpacing.lg)
-            .background(Color.echoSurface)
-            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl))
-
-            Spacer()
-
-            EchoButton("Continue to Echo") {
-                onComplete()
-            }
-            .accessibilityHint("Opens the main Echo screen")
-
-            Spacer().frame(height: EchoSpacing.lg)
+            .padding(.top, EchoSpacing.lg)
         }
-        .padding(.horizontal, EchoSpacing.lg)
+        .scrollIndicators(.hidden)
     }
 }
 

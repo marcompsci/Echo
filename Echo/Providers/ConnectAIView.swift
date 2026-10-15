@@ -47,7 +47,7 @@ struct ConnectAIView: View {
             .listRowBackground(Color.echoSurface)
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("Connect AI")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -154,7 +154,7 @@ private struct ProviderDetailView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle(provider.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

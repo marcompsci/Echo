@@ -10,7 +10,36 @@ struct HomeRootView: View {
 
     var body: some View {
         @Bindable var router = router
-        NavigationStack(path: $router.path) {
+        TabView(selection: $router.selectedTab) {
+            Tab("Home", systemImage: "circle.hexagongrid.fill", value: EchoTab.home) {
+                homeStack
+            }
+            Tab("Tools", systemImage: "square.grid.2x2.fill", value: EchoTab.tools) {
+                ToolsView()
+            }
+            Tab("Activity", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90", value: EchoTab.activity) {
+                NavigationStack { ActivityLogView() }
+            }
+            Tab("Settings", systemImage: "gearshape.fill", value: EchoTab.settings) {
+                SettingsView(showsDone: false)
+                    .environment(\.modelContext, modelContext)
+            }
+        }
+        .tint(.echoLavender)
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewBottomAccessory {
+            HeyEchoAccessory {
+                router.heyEchoGreeting = UserProfile.helpGreeting
+                router.heyEchoText = nil
+                router.showHeyEcho = true
+            }
+        }
+        .modifier(RootPresentations(launchCenter: launchCenter, launchError: $launchError))
+    }
+
+    private var homeStack: some View {
+        @Bindable var router = router
+        return NavigationStack(path: $router.path) {
             HomeView()
                 .navigationDestination(for: EchoRoute.self) { route in
                     switch route {
@@ -40,10 +69,19 @@ struct HomeRootView: View {
                     }
                 }
         }
-        .sheet(isPresented: $router.showSettings) {
-            SettingsView()
-                .environment(\.modelContext, modelContext)
-        }
+    }
+}
+
+// MARK: - Hey Echo, Siri/Shortcut launches and alerts (shared by every tab)
+
+private struct RootPresentations: ViewModifier {
+    @Environment(AppRouter.self) private var router
+    let launchCenter: EchoLaunchCenter
+    @Binding var launchError: String?
+
+    func body(content: Content) -> some View {
+        @Bindable var router = router
+        content
         .fullScreenCover(isPresented: $router.showHeyEcho, onDismiss: { router.heyEchoGreeting = nil; router.heyEchoText = nil }) {
             HeyEchoView(greeting: router.heyEchoGreeting, initialText: router.heyEchoText) { route in
                 switch route {
@@ -91,10 +129,10 @@ struct HomeRootView: View {
             router.popToHome()
             router.navigateToLiveGuide()
         case .photoCleanup:
-            router.showSettings = false
+            router.selectedTab = .home
             router.path.append(EchoRoute.photoCleanup)
         case .fileOrganizer:
-            router.showSettings = false
+            router.selectedTab = .home
             router.path.append(EchoRoute.fileCleanup)
         case .connectAI:
             router.showSettings = true

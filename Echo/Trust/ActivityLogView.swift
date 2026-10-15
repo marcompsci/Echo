@@ -73,7 +73,7 @@ struct ActivityLogView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color.echoBackground)
+        .echoScreenBackground()
         .navigationTitle("Trust & Undo")
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog("Clear Echo's activity history? (This doesn't undo anything.)", isPresented: $confirmClear, titleVisibility: .visible) {

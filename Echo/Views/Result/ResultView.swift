@@ -66,7 +66,6 @@ struct ResultView: View {
         .navigationTitle("Echo's Guide")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color.echoBackground, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationBarBackButtonHidden(false)
         // Action confirmation
         .confirmationDialog(
