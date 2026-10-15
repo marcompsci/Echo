@@ -15,6 +15,9 @@ enum HeyEchoRoute: Equatable {
     case forget(String)          // "forget my gym"
     case undo                    // "undo that" / "take that back"
     case skill(EchoSkill)        // one of your own Echo Skills
+    case photoCleanup            // "clean up my photos", "delete old screenshots"
+    case fileCleanup             // "organize my files"
+    case refusePurchase          // "buy…", "pay for…" — Echo never does this
     case nothingHeard
 }
 
@@ -105,6 +108,16 @@ final class HeyEchoBrain {
         for prefix in ["forget about ", "forget that ", "forget "] where lower.hasPrefix(prefix) {
             let what = String(text.dropFirst(prefix.count))
             return what.isEmpty ? nil : .forget(what)
+        }
+        if PurchaseGuard.isPurchaseRequest(lower) { return .refusePurchase }
+        let tidyWords = ["delete", "clean", "clear", "organize", "organise", "sort", "free up", "remove", "tidy"]
+        if tidyWords.contains(where: lower.contains) {
+            if ["photo", "picture", "screenshot", "video", "gallery", "camera roll", "storage", "space"].contains(where: lower.contains) {
+                return .photoCleanup
+            }
+            if ["file", "document", "download", "folder", "pdf"].contains(where: lower.contains) {
+                return .fileCleanup
+            }
         }
         return nil
     }

@@ -52,12 +52,14 @@ struct LiveGuideBackendTests {
     }
 }
 
-@Suite("v1 safety: no photo or contact deletion")
+@Suite("Safety: deletions only from a reviewed selection")
 struct DeletionDisabledTests {
 
     @Test("Delete actions are blocked")
     func deleteActionsBlocked() {
-        #expect(FeatureFlags.allowsPhotoAndContactDeletion == false)
+        #expect(FeatureFlags.allowsContactDeletion == false)
+        #expect(FeatureFlags.allowsPurchases == false)
+        // Photos are deleted only from Photo Cleanup, never straight from a voice plan.
         #expect(AgentAction.deletePhoto(localIdentifier: "x", displayName: "x").isBlockedInV1)
         #expect(AgentAction.deleteContact(id: "x", displayName: "x").isBlockedInV1)
         #expect(!AgentAction.createAlbum(name: "Receipts").isBlockedInV1)

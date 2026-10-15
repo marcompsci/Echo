@@ -13,6 +13,9 @@ enum EchoLaunchRequest: Equatable {
     case heyEcho                 // open Echo already listening
     case heyEchoWith(String)     // ask/do/remember/skill handed in by a link or Shortcut
     case liveGuideGoal(String)   // Live Guide with a goal
+    case photoCleanup            // Photo Cleanup & Organizer
+    case fileOrganizer           // File Cleanup & Organizer
+    case connectAI               // Settings → Connect AI
 }
 
 @Observable
@@ -38,6 +41,8 @@ final class EchoLaunchCenter {
             }
             return true
         case "hey":             pending = .heyEcho; return true
+        case "photos":          pending = .photoCleanup; return true
+        case "files":           pending = .fileOrganizer; return true
         default:                break
         }
         // Developer hooks: echo://ask?q=…  echo://do?task=…  echo://remember?text=…

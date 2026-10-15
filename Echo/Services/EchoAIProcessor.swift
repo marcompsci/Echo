@@ -141,11 +141,11 @@ struct EchoAIProcessor: Sendable {
         func toAgentPlan() -> AgentPlan {
             switch self {
 
-            case .deleteContact where !FeatureFlags.allowsPhotoAndContactDeletion:
+            case .deleteContact where !FeatureFlags.allowsContactDeletion:
                 return .deletionUnavailable("contacts", appName: "Contacts")
 
-            case .deletePhoto where !FeatureFlags.allowsPhotoAndContactDeletion:
-                return .deletionUnavailable("photos", appName: "Photos")
+            case .deletePhoto:
+                return .photoCleanupInstead
 
             case .deleteContact(let name):
                 return AgentPlan(
@@ -153,14 +153,6 @@ struct EchoAIProcessor: Sendable {
                     explanation: "Echo will search for contacts matching '\(name)' and ask you to confirm before deleting.",
                     actions: [.deleteContact(id: "nlp:\(name)", displayName: name)],
                     safetyNotice: "Contact deletion is permanent. Export a backup first if needed."
-                )
-
-            case .deletePhoto(let query):
-                return AgentPlan(
-                    title: "Delete photos",
-                    explanation: "Echo will locate photos matching '\(query)' and show them before deletion.",
-                    actions: [.deletePhoto(localIdentifier: "nlp:\(query)", displayName: query)],
-                    safetyNotice: "Deleted photos move to Recently Deleted for 30 days."
                 )
 
             case .createFolder(let name):

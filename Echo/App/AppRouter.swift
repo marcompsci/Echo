@@ -9,6 +9,8 @@ enum EchoRoute: Hashable {
     case agent
     case liveGuide
     case heyEchoSetup
+    case photoCleanup
+    case fileCleanup
 }
 
 @Observable

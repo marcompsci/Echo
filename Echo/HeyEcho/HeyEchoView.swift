@@ -161,7 +161,17 @@ struct HeyEchoView: View {
             phase = .done
             reply = "I didn't catch that. Tap the orb and try again."
         case .answer(let text):
-            await sayThenMaybeListen(text)
+            // A connected AI (Claude, ChatGPT, Grok, Muse) chosen for Questions answers instead.
+            let provider = AIConnections.provider(for: .questions)
+            if provider.needsKey {
+                phase = .thinking
+                let external = try? await ExternalAIClient(provider: provider).complete(
+                    system: "You are Echo, a friendly iPhone voice assistant. Answer in 1-3 short spoken sentences. Say so honestly if you don't know. \(EchoPersonalContext.text())",
+                    prompt: heard, maxTokens: 300)
+                await sayThenMaybeListen(external ?? text)
+            } else {
+                await sayThenMaybeListen(text)
+            }
         case .doTask(let request):
             await planTask(request, origin: "Hey Echo")
         case .remember(let fact):
@@ -178,6 +188,16 @@ struct HeyEchoView: View {
             await undo()
         case .skill(let skill):
             await runSkill(skill)
+        case .photoCleanup:
+            await speakAndWait("Opening Photo Cleanup. You pick what goes — I'll ask before deleting anything.")
+            EchoLaunchCenter.shared.request(.photoCleanup)
+            dismiss()
+        case .fileCleanup:
+            await speakAndWait("Opening File Cleanup. I'll sort and find duplicates, and only delete what you choose.")
+            EchoLaunchCenter.shared.request(.fileOrganizer)
+            dismiss()
+        case .refusePurchase:
+            say(AgentPlan.purchaseRefused.explanation)
         case .helpWithScreen, .walkMeThrough:
             onRoute(route)
             dismiss()
@@ -187,6 +207,12 @@ struct HeyEchoView: View {
     private func planTask(_ request: String, origin: String) async {
         let plan = try? await LiveAgentService(origin: origin).analyze(request: AgentRequest(text: request))
         guard let plan, !plan.actions.isEmpty else {
+            if plan?.title == AgentPlan.photoCleanupTitle {
+                await speakAndWait(plan?.explanation ?? "")
+                EchoLaunchCenter.shared.request(.photoCleanup)
+                dismiss()
+                return
+            }
             say(plan?.explanation ?? "I can't do that one yet.")
             return
         }
@@ -263,7 +289,7 @@ struct HeyEchoView: View {
 
     private static func engineName(for route: HeyEchoRoute) -> String {
         switch route {
-        case .remember, .forget, .undo: return "On-device command"
+        case .remember, .forget, .undo, .photoCleanup, .fileCleanup, .refusePurchase: return "On-device command"
         case .skill: return "Echo Skill"
         default: return AppleIntelligence.isAvailable ? "Apple Intelligence" : "Keywords"
         }
@@ -279,6 +305,9 @@ struct HeyEchoView: View {
         case .forget: return "Forgot from memory"
         case .undo: return "Undo"
         case .skill(let s): return "Skill: \(s.name)"
+        case .photoCleanup: return "Photo Cleanup"
+        case .fileCleanup: return "File Cleanup"
+        case .refusePurchase: return "Refused purchase"
         case .nothingHeard: return "Nothing heard"
         }
     }

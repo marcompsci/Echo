@@ -219,3 +219,11 @@ Built from web research on what customers and developers ask of AI assistants:
 
 Backend: `echo-guide` accepts an optional `userContext` string (redeploy to use it):
 `supabase functions deploy echo-guide --no-verify-jwt --use-api`
+
+## Phase 4 — Error Doctor, Connect AI, Cleanup (Oct 2026)
+
+- **Error Doctor** (`Echo/Doctor/`): any screenshot with an error on it gets an "Echo spotted an error" card — instant answer from Echo's built-in iOS error knowledge (storage full, untrusted developer, Developer Mode, Wi-Fi, certificates, Apple Account, payments, updates, permissions, SIM, iCloud, Bluetooth, Face ID, Mail, Screen Time, Xcode signing, API 401s…), then the exact cause and fix from the AI you chose. Echo speaks it and asks **"Want me to fix it?"** — a permission sheet lists exactly what it will do.
+- **Connect AI** (`Echo/Providers/`): bring your own Claude (Anthropic), ChatGPT (OpenAI), Grok (xAI) or Muse (Meta) API key — stored in the Keychain, sent only to that provider — and choose who handles Screenshot help, Fixing errors, Questions and Writing. Model names and endpoints are editable.
+- **Photo Cleanup & File Cleanup** (`Echo/Organizer/`): screenshots, old screenshots, screen recordings, big videos and duplicates; sort files into folders by type, find exact duplicates. Delete only what you pick, after Echo confirms (photos also get iOS's prompt + 30-day Recently Deleted).
+- **Never without permission:** Echo has no purchase ability (`PurchaseGuard`), voice can't delete directly (opens Cleanup), contacts deletion stays off.
+- iOS limit: no app can take over the whole iPhone like Claude Code does on a Mac. Echo uses everything Apple allows: Live Guide (watches + tells you each tap), Echo Agent (does tasks through Apple's APIs), Cleanup (Photos/Files), Shortcuts.

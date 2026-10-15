@@ -77,12 +77,11 @@ struct OnDeviceAgentPlanner {
 
         let task = try await session.respond(to: request.text, generating: PlannedAgentTask.self).content
 
-        if task.actions.contains(where: { $0.kind == .deletePhotosOrContacts }),
-           !FeatureFlags.allowsPhotoAndContactDeletion {
+        if task.actions.contains(where: { $0.kind == .deletePhotosOrContacts }) {
             let mentionsContacts = request.text.lowercased().contains("contact")
-            return mentionsContacts
+            return mentionsContacts && !FeatureFlags.allowsContactDeletion
                 ? .deletionUnavailable("contacts", appName: "Contacts")
-                : .deletionUnavailable("photos", appName: "Photos")
+                : .photoCleanupInstead
         }
 
         let actions = task.actions.prefix(5).compactMap { Self.agentAction(from: $0, fallbackText: request.text) }

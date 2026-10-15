@@ -29,13 +29,11 @@ struct MockAgentService: AgentService {
     private func buildMockPlan(for text: String) -> AgentPlan {
         let lower = text.lowercased()
 
-        if !FeatureFlags.allowsPhotoAndContactDeletion {
-            if lower.contains("contact") && (lower.contains("delete") || lower.contains("remove")) {
-                return .deletionUnavailable("contacts", appName: "Contacts")
-            }
-            if lower.contains("photo") && (lower.contains("delete") || lower.contains("remove") || lower.contains("clear")) {
-                return .deletionUnavailable("photos", appName: "Photos")
-            }
+        if !FeatureFlags.allowsContactDeletion, lower.contains("contact") && (lower.contains("delete") || lower.contains("remove")) {
+            return .deletionUnavailable("contacts", appName: "Contacts")
+        }
+        if lower.contains("photo") && (lower.contains("delete") || lower.contains("remove") || lower.contains("clear")) {
+            return .photoCleanupInstead
         }
 
         if lower.contains("contact") && (lower.contains("delete") || lower.contains("remove")) {

@@ -67,6 +67,16 @@ struct HybridGuideService: GuideService {
     }
 
     private func route(imageData: Data, userQuestion: String) async throws -> (GuideResponse, String) {
+        // A connected AI (Claude, ChatGPT, Grok, Muse) chosen for screenshot help goes first.
+        let chosen = AIConnections.provider(for: .screenHelp)
+        if chosen.needsKey {
+            do {
+                return (try await ExternalGuideService(provider: chosen).createGuide(imageData: imageData, userQuestion: userQuestion),
+                        chosen.name)
+            } catch {
+                // fall back to Echo's normal engines below
+            }
+        }
         let engine = GuideEngine.current
 
         if engine == .onDevice || cloud == nil {

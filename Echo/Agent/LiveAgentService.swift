@@ -21,6 +21,7 @@ struct LiveAgentService: AgentService {
     // Apple Intelligence plans the task on-device when available;
     // otherwise Echo falls back to its simple keyword parser.
     func analyze(request: AgentRequest) async throws -> AgentPlan {
+        if PurchaseGuard.isPurchaseRequest(request.text) { return .purchaseRefused }
         if AppleIntelligence.isAvailable {
             if let plan = try? await OnDeviceAgentPlanner().plan(for: request) {
                 return plan

@@ -58,7 +58,7 @@ actor ContactAgent {
     // MARK: - Mutate
 
     func delete(contactWithID id: String) async throws {
-        guard FeatureFlags.allowsPhotoAndContactDeletion else {
+        guard FeatureFlags.allowsContactDeletion else {
             throw EchoAgentError.executionFailed("Deleting contacts isn't available in this version of Echo.")
         }
         guard await requestAccess() else {

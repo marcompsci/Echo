@@ -76,9 +76,10 @@ enum AgentAction: Identifiable, Sendable {
 
     /// True for actions turned off in v1 (see FeatureFlags).
     var isBlockedInV1: Bool {
-        guard !FeatureFlags.allowsPhotoAndContactDeletion else { return false }
         switch self {
-        case .deleteContact, .deletePhoto: return true
+        case .deleteContact: return !FeatureFlags.allowsContactDeletion
+        // Photos are only deleted from Photo Cleanup, where you pick each one.
+        case .deletePhoto:   return true
         default: return false
         }
     }
@@ -180,6 +181,26 @@ struct AgentPlan: Identifiable, Sendable {
         )
     }
     var destructiveCount: Int { actions.filter { $0.isDestructive }.count }
+
+    static let photoCleanupTitle = "Pick what to delete in Photo Cleanup"
+
+    /// Voice never deletes photos directly: Echo opens Photo Cleanup so you choose each one.
+    static var photoCleanupInstead: AgentPlan {
+        AgentPlan(
+            title: photoCleanupTitle,
+            explanation: "I'll open Photo Cleanup so you can pick exactly which photos to delete. I'll ask once more before anything is deleted, and you can restore them for 30 days.",
+            actions: []
+        )
+    }
+
+    /// Echo never buys or pays for anything.
+    static var purchaseRefused: AgentPlan {
+        AgentPlan(
+            title: "Echo doesn't buy things",
+            explanation: "I never buy, order, or pay for anything for you. I can walk you through checking out yourself, or set a reminder.",
+            actions: []
+        )
+    }
 }
 
 // MARK: - Result after execution

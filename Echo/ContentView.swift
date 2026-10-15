@@ -33,6 +33,10 @@ struct HomeRootView: View {
                         LiveGuideView()
                     case .heyEchoSetup:
                         HeyEchoSetupView()
+                    case .photoCleanup:
+                        PhotoCleanupView()
+                    case .fileCleanup:
+                        FileCleanupView()
                     }
                 }
         }
@@ -86,6 +90,14 @@ struct HomeRootView: View {
             router.pendingLiveGoal = goal
             router.popToHome()
             router.navigateToLiveGuide()
+        case .photoCleanup:
+            router.showSettings = false
+            router.path.append(EchoRoute.photoCleanup)
+        case .fileOrganizer:
+            router.showSettings = false
+            router.path.append(EchoRoute.fileCleanup)
+        case .connectAI:
+            router.showSettings = true
         case .capturedScreen(let id):
             guard let data = ScreenCaptureStore.take(id) else {
                 launchError = "That screen is no longer available. Try Visual Intelligence again."

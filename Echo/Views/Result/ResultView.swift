@@ -25,6 +25,7 @@ struct ResultView: View {
             Color.echoBackground.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: EchoSpacing.lg) {
+                    ErrorDoctorCard(imageData: imageData, willSpeak: { narrator.stop() })
                     imageSection
                     if let receipt = DevInspector.shared.recentShieldReceipt {
                         Label(receipt, systemImage: "eye.slash.fill")

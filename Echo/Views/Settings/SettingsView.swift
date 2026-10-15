@@ -146,6 +146,21 @@ struct SettingsView: View {
             } label: {
                 Label("Voice & Simple Mode", systemImage: "person.wave.2")
             }
+            NavigationLink {
+                ConnectAIView()
+            } label: {
+                Label("Connect AI (Claude, ChatGPT, Grok, Muse)", systemImage: "link.circle")
+            }
+            NavigationLink {
+                PhotoCleanupView()
+            } label: {
+                Label("Photo Cleanup", systemImage: "photo.stack")
+            }
+            NavigationLink {
+                FileCleanupView()
+            } label: {
+                Label("File Cleanup", systemImage: "folder.badge.gearshape")
+            }
         } header: {
             Text("Echo Knows You")
         } footer: {
