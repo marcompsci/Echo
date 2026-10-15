@@ -2,7 +2,8 @@
 //  EchoWidgetExtensionControl.swift
 //  EchoWidgetExtension
 //
-//  Created by Omari Bell on 9/24/26.
+//  Control Center / Lock Screen / Action Button controls — Echo's "hotkey".
+//  Take a screenshot, then tap "Ask Echo" to get help with it.
 //
 
 import AppIntents
@@ -11,44 +12,49 @@ import WidgetKit
 
 struct EchoWidgetExtensionControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(
-            kind: "phoronomicstudios.com.Echo.EchoWidgetExtension",
-            provider: Provider()
-        ) { value in
-            ControlWidgetToggle(
-                "Start Timer",
-                isOn: value,
-                action: StartTimerIntent()
-            ) { isRunning in
-                Label(isRunning ? "On" : "Off", systemImage: "timer")
+        StaticControlConfiguration(kind: "phoronomicstudios.com.Echo.AskEcho") {
+            ControlWidgetButton(action: OpenURLIntent(URL(string: "echo://last-screenshot")!)) {
+                Label("Ask Echo", systemImage: "camera.viewfinder")
             }
         }
-        .displayName("Timer")
-        .description("A an example control that runs a timer.")
+        .displayName("Ask Echo")
+        .description("Open your latest screenshot in Echo and ask what to do next.")
     }
 }
 
-extension EchoWidgetExtensionControl {
-    struct Provider: ControlValueProvider {
-        var previewValue: Bool {
-            false
+struct EchoAgentControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "phoronomicstudios.com.Echo.EchoAgent") {
+            ControlWidgetButton(action: OpenURLIntent(URL(string: "echo://agent")!)) {
+                Label("Echo Agent", systemImage: "wand.and.stars")
+            }
         }
-
-        func currentValue() async throws -> Bool {
-            let isRunning = true // Check if the timer is running
-            return isRunning
-        }
+        .displayName("Echo Agent")
+        .description("Ask Echo to create a reminder, note, contact, or album.")
     }
 }
 
-struct StartTimerIntent: SetValueIntent {
-    static let title: LocalizedStringResource = "Start a timer"
+struct EchoLiveGuideControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "phoronomicstudios.com.Echo.LiveGuide") {
+            ControlWidgetButton(action: OpenURLIntent(URL(string: "echo://live")!)) {
+                Label("Echo Live Guide", systemImage: "eye")
+            }
+        }
+        .displayName("Echo Live Guide")
+        .description("Let Echo watch your screen and talk you through a task.")
+    }
+}
 
-    @Parameter(title: "Timer is running")
-    var value: Bool
-
-    func perform() async throws -> some IntentResult {
-        // Start / stop the timer based on `value`.
-        return .result()
+/// "Hey Echo" — put it on the Action Button, Lock Screen, or Control Center.
+struct HeyEchoControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "phoronomicstudios.com.Echo.HeyEcho") {
+            ControlWidgetButton(action: OpenURLIntent(URL(string: "echo://hey")!)) {
+                Label("Hey Echo", systemImage: "waveform.circle.fill")
+            }
+        }
+        .displayName("Hey Echo")
+        .description("Open Echo already listening.")
     }
 }

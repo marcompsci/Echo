@@ -122,6 +122,42 @@ Echo's real guides come from a Supabase Edge Function in `supabase/functions/ech
 
 ---
 
+## Clicky-style features on iPhone (Apple Intelligence)
+
+| Clicky on Mac | Echo on iPhone |
+|---|---|
+| Watches your screen live | **Live Guide**: set a goal, tap Start Screen Sharing, go to any app. The `EchoLiveGuide` broadcast extension looks at the screen each time it settles, asks the guide service (`mode: "live"`) for the next step, and shows it as a banner + speaks it |
+| Hotkey to summon | Control Center / Lock Screen / **Action Button** control "Ask Echo" (opens your latest screenshot), Siri: "Ask Echo about my screenshot", Shortcuts actions |
+| Sees your screen | Screenshot → **Visual Intelligence** shows "Ask Echo about this" (`Intents/VisualIntelligenceIntents.swift`), latest-screenshot import, Photos picker |
+| Talks to you | `GuideNarrator` reads the summary and steps aloud (toggle in Settings) |
+| Points at the screen | Numbered markers + Echo's pointer glides to each step's marker while it's read aloud |
+| Voice input | On-device speech recognition, cleaned up by Apple Intelligence |
+| Agent mode | Echo Agent plans tasks with the **on-device Apple Intelligence model** (`OnDeviceAgentPlanner`), always shown for confirmation; photo/contact deletion stays off |
+| Model routing | Settings → Guide engine: Automatic (Claude, falls back to Apple Intelligence), On-device only, Cloud only |
+
+Live Guide needs a real iPhone (the Simulator can't broadcast), the updated `echo-guide` function deployed, and notifications allowed. Optional secret: `ECHO_LIVE_MODEL` (default `claude-haiku-5-5`, chosen for speed). Shared app ↔ extension code lives in `EchoShared/` and uses the App Group `group.phoronomicstudios.com.Echo`.
+
+On-device features need an Apple Intelligence–capable iPhone with Apple Intelligence turned on; Echo falls back automatically when it isn't available. Visual Intelligence only compiles where the `VisualIntelligence` framework exists (real devices).
+
+---
+
+## Accounts, feedback & Lock Screen presence
+
+**Accounts (Supabase Auth):** onboarding and Settings offer Sign in with Apple, Google (Gmail), and GitHub (for developers). One-time setup in the Supabase dashboard → Authentication:
+- Providers: enable **Apple** (Client IDs: `phoronomicstudios.com.Echo`), **Google** (Google Cloud OAuth client ID/secret), **GitHub** (GitHub OAuth App; callback `https://itjoqbgcwhcancpdfqzu.supabase.co/auth/v1/callback`).
+- URL Configuration → Redirect URLs: add `echo://auth-callback`.
+- Xcode: if signing complains about Sign in with Apple, add it under Signing & Capabilities.
+
+**Feedback → GitHub (`supabase/functions/echo-feedback`):** user feedback and developer feedback (GitHub-connected only) are committed to the `echo-feedback` branch under `feedback/`. Developer feedback is rewritten by Claude into a change request whose commit message starts with `// TODO(Omari): …`.
+```
+supabase secrets set GITHUB_TOKEN=github_pat_... --project-ref itjoqbgcwhcancpdfqzu   # fine-grained, Contents: read & write on marcompsci/Echo
+supabase functions deploy echo-feedback --project-ref itjoqbgcwhcancpdfqzu --no-verify-jwt --use-api
+```
+
+**Lock Screen & Dynamic Island:** Settings → Digital Pet → "Echo on Lock Screen & Dynamic Island" starts a Live Activity with Echo's orb; it mirrors Hey Echo and Live Guide status, and tapping it opens Hey Echo. (Replaces the earlier Picture-in-Picture orb, which risked App Store rejection.)
+
+---
+
 ## Required Info.plist keys
 
 | Key | Reason |

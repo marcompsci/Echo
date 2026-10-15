@@ -4,6 +4,7 @@ import SwiftUI
 
 struct FloatingPetView: View {
     @Environment(PetState.self) private var pet
+    @Environment(AppRouter.self) private var router
     let containerSize: CGSize
 
     private let petSize: CGFloat = 80
@@ -25,11 +26,9 @@ struct FloatingPetView: View {
             isExcited:    pet.isExcited,
             size:         petSize
         )
-        .shadow(
-            color:  pet.bodyColor.shadowColor,
-            radius: isDragging ? 14 : 7,
-            y:      isDragging ? 5 : 2
-        )
+        // 65% opacity while it floats over the app, so content behind stays
+        // readable; it firms up a little while you drag it.
+        .opacity(isDragging ? 0.85 : 0.65)
         .scaleEffect(isDragging ? 1.07 : 1.0)
         .offset(y: bobbing ? -4 : 0)
         .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true), value: bobbing)
@@ -48,7 +47,11 @@ struct FloatingPetView: View {
                     }
                 }
         )
-        .onTapGesture { pet.pet() }
+        .onTapGesture {
+            pet.pet()
+            router.heyEchoGreeting = UserProfile.helpGreeting
+            router.showHeyEcho = true
+        }
         .contextMenu {
             Button { pet.feed() } label: {
                 Label("Feed \(pet.name)", systemImage: "fork.knife")
@@ -100,7 +103,7 @@ struct FloatingPetView: View {
             }
         }
         .accessibilityLabel("\(pet.name), mood: \(pet.mood.label)")
-        .accessibilityHint("Tap to pet. Hold to feed or customize. Drag to move.")
+        .accessibilityHint("Tap to talk to Echo. Hold to feed or customize. Drag to move.")
     }
 
     // Keep pet within the container with padding

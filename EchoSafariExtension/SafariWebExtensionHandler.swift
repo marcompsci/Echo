@@ -6,7 +6,7 @@ import os.log
 final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     private let logger = Logger(subsystem: "com.echo.extension", category: "SafariExtension")
-    private let appGroupID = "group.com.echo.extension"
+    private let appGroupID = "group.phoronomicstudios.com.Echo"
 
     func beginRequest(with context: NSExtensionContext) {
         let item = context.inputItems.first as? NSExtensionItem

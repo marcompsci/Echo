@@ -40,6 +40,17 @@ enum AgentAction: Identifiable, Sendable {
     // Notes (URL handoff — Notes has no public API)
     case createNote(title: String, body: String)
 
+    // Calendar
+    case createEvent(title: String, start: Date, end: Date)
+
+    // Hand-offs: Echo fills everything in and opens the app; you tap Send/Call/Go.
+    case sendMessage(recipient: String, body: String)
+    case sendEmail(to: String, subject: String, body: String)
+    case callPhone(recipient: String)
+    case getDirections(destination: String)
+    case runShortcut(name: String)
+    case openWebsite(url: String)
+
     // Each action gets a stable ID derived from its payload
     var id: String {
         switch self {
@@ -53,6 +64,13 @@ enum AgentAction: Identifiable, Sendable {
         case .createReminder(let title, _):  return "create-reminder-\(title)"
         case .deleteReminder(let id, _):     return "del-reminder-\(id)"
         case .createNote(let title, _):      return "create-note-\(title)"
+        case .createEvent(let title, let start, _): return "event-\(title)-\(start.timeIntervalSince1970)"
+        case .sendMessage(let to, let body): return "msg-\(to)-\(body.hashValue)"
+        case .sendEmail(let to, let subject, _): return "mail-\(to)-\(subject)"
+        case .callPhone(let who):            return "call-\(who)"
+        case .getDirections(let place):      return "maps-\(place)"
+        case .runShortcut(let name):         return "shortcut-\(name)"
+        case .openWebsite(let url):          return "web-\(url)"
         }
     }
 
@@ -79,6 +97,13 @@ enum AgentAction: Identifiable, Sendable {
         case .createFile, .deleteFile, .renameFile: return "doc"
         case .createReminder, .deleteReminder:      return "bell"
         case .createNote:                           return "note.text"
+        case .createEvent:                          return "calendar.badge.plus"
+        case .sendMessage:                          return "message"
+        case .sendEmail:                            return "envelope"
+        case .callPhone:                            return "phone"
+        case .getDirections:                        return "map"
+        case .runShortcut:                          return "square.stack.3d.up"
+        case .openWebsite:                          return "safari"
         }
     }
 
@@ -94,6 +119,14 @@ enum AgentAction: Identifiable, Sendable {
         case .createReminder(let title, _):     return "Create reminder: \(title)"
         case .deleteReminder(_, let title):     return "Delete reminder: \(title)"
         case .createNote(let title, _):         return "Create note: \(title)"
+        case .createEvent(let title, let start, _):
+            return "Add to calendar: \(title), \(start.formatted(date: .abbreviated, time: .shortened))"
+        case .sendMessage(let to, let body):    return "Text \(to): “\(body)” (you tap Send)"
+        case .sendEmail(let to, let subject, _): return "Email \(to): \(subject) (you tap Send)"
+        case .callPhone(let who):               return "Call \(who) (you confirm the call)"
+        case .getDirections(let place):         return "Directions to \(place) in Maps"
+        case .runShortcut(let name):            return "Run your shortcut “\(name)”"
+        case .openWebsite(let url):             return "Open \(url)"
         }
     }
 

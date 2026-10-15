@@ -13,14 +13,16 @@ struct OnboardingView: View {
                 TabView(selection: $page) {
                     OnboardingPage1().tag(0)
                     OnboardingPage2().tag(1)
-                    OnboardingPage3(onComplete: onComplete).tag(2)
+                    OnboardingNamePage(onNext: { page = 3 }).tag(2)
+                    OnboardingConnectPage(onNext: { page = 4 }).tag(3)
+                    OnboardingPage3(onComplete: finish).tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(reduceMotion ? .none : .easeInOut(duration: 0.35), value: page)
 
                 // Page indicator
                 HStack(spacing: 8) {
-                    ForEach(0..<3, id: \.self) { i in
+                    ForEach(0..<5, id: \.self) { i in
                         Capsule()
                             .fill(
                                 i == page
@@ -33,9 +35,92 @@ struct OnboardingView: View {
                 }
                 .padding(.bottom, EchoSpacing.xxl)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Page \(page + 1) of 3")
+                .accessibilityLabel("Page \(page + 1) of 5")
             }
         }
+    }
+
+    /// Echo says hello (by name) the moment onboarding finishes.
+    private func finish() {
+        let name = UserProfile.name
+        welcomeNarrator.speak(text: name.isEmpty ? "Hi, I'm Echo. I'm here whenever you need me."
+                                                 : "Hi \(name), I'm Echo. I'm here whenever you need me.")
+        onComplete()
+    }
+}
+
+/// Kept outside the view so the greeting keeps playing after onboarding closes.
+@MainActor private let welcomeNarrator = GuideNarrator()
+
+// MARK: - Page: connect an account
+
+private struct OnboardingConnectPage: View {
+    var onNext: () -> Void
+    @State private var accounts = AccountService.shared
+
+    var body: some View {
+        VStack(spacing: EchoSpacing.lg) {
+            Spacer()
+            Image(systemName: "person.crop.circle.badge.checkmark")
+                .font(.system(size: 64))
+                .foregroundStyle(LinearGradient.echoAccent)
+                .accessibilityHidden(true)
+            VStack(spacing: EchoSpacing.sm) {
+                Text("Connect your account")
+                    .font(.echoTitle)
+                    .foregroundStyle(.echoTextPrimary)
+                Text("Keep your guides and settings with you.\nYou can skip this and connect later in Settings.")
+                    .font(.echoCallout)
+                    .foregroundStyle(.echoTextSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            ConnectAccountsView(onDone: onNext)
+            Spacer()
+            EchoButton(accounts.isSignedIn ? "Next" : "Skip for now") { onNext() }
+            Spacer().frame(height: EchoSpacing.lg)
+        }
+        .padding(.horizontal, EchoSpacing.lg)
+    }
+}
+
+// MARK: - Page: your name
+
+private struct OnboardingNamePage: View {
+    var onNext: () -> Void
+    @AppStorage(UserProfile.nameKey) private var userName = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        VStack(spacing: EchoSpacing.xl) {
+            Spacer()
+            EchoOrbView(size: 130)
+            VStack(spacing: EchoSpacing.sm) {
+                Text("What should Echo\ncall you?")
+                    .font(.echoTitle)
+                    .foregroundStyle(.echoTextPrimary)
+                    .multilineTextAlignment(.center)
+                Text("Echo will greet you by name.")
+                    .font(.echoCallout)
+                    .foregroundStyle(.echoTextSecondary)
+            }
+            TextField("Your first name", text: $userName)
+                .font(.echoTitle3)
+                .multilineTextAlignment(.center)
+                .textContentType(.givenName)
+                .submitLabel(.next)
+                .padding(EchoSpacing.md)
+                .background(Color.echoSurface)
+                .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+                .focused($focused)
+                .onSubmit { focused = false; onNext() }
+            Spacer()
+            EchoButton(userName.trimmingCharacters(in: .whitespaces).isEmpty ? "Skip" : "Next") {
+                focused = false
+                onNext()
+            }
+            Spacer().frame(height: EchoSpacing.lg)
+        }
+        .padding(.horizontal, EchoSpacing.lg)
     }
 }
 

@@ -30,6 +30,10 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>Echo creates or reads calendar events only when you ask it to. You review every action before it runs.</string>
 
+	<!-- Echo's orb on the Lock Screen and in the Dynamic Island -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+
 	<!-- URL scheme: used by future Share Extension (echo://import) and Agent deep links -->
 	<key>CFBundleURLTypes</key>
 	<array>

@@ -15,6 +15,7 @@
 		9D8C736D306607E70082FCFE /* EchoWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9D8C735A306607E60082FCFE /* EchoWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9D8C79F5306A0F800082FCFE /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9D8C79F4306A0F800082FCFE /* README.md */; };
 		9D8C79F7306A0F930082FCFE /* ShareExtensionSetup.md in Resources */ = {isa = PBXBuildFile; fileRef = 9D8C79F6306A0F930082FCFE /* ShareExtensionSetup.md */; };
+		EC4000000000000A11CE0001 /* EchoLiveGuide.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EC4000000000000A11CE0000 /* EchoLiveGuide.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,13 @@
 			remoteGlobalIDString = 9D8C7359306607E60082FCFE;
 			remoteInfo = EchoWidgetExtensionExtension;
 		};
+		EC4000000000000A11CE0002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D8C72C13066025A0082FCFE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC4000000000000A11CE000A;
+			remoteInfo = EchoLiveGuide;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -65,6 +73,7 @@
 				9D8C736D306607E70082FCFE /* EchoWidgetExtensionExtension.appex in Embed Foundation Extensions */,
 				9D8C7338306607710082FCFE /* EchoSafariExtension.appex in Embed Foundation Extensions */,
 				9D8C7351306607960082FCFE /* EchoiMessageExtension.appex in Embed Foundation Extensions */,
+				EC4000000000000A11CE0001 /* EchoLiveGuide.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,6 +99,7 @@
 		9D8C735D306607E60082FCFE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		9D8C79F4306A0F800082FCFE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9D8C79F6306A0F930082FCFE /* ShareExtensionSetup.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ShareExtensionSetup.md; sourceTree = "<group>"; };
+		EC4000000000000A11CE0000 /* EchoLiveGuide.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EchoLiveGuide.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -120,6 +130,13 @@
 				Info.plist,
 			);
 			target = 9D8C7359306607E60082FCFE /* EchoWidgetExtensionExtension */;
+		};
+		EC4000000000000A11CE0004 /* Exceptions for "EchoLiveGuide" folder in "EchoLiveGuide" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EC4000000000000A11CE000A /* EchoLiveGuide */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -170,6 +187,19 @@
 			path = EchoWidgetExtension;
 			sourceTree = "<group>";
 		};
+		EC4000000000000A11CE0005 /* EchoLiveGuide */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EC4000000000000A11CE0004 /* Exceptions for "EchoLiveGuide" folder in "EchoLiveGuide" target */,
+			);
+			path = EchoLiveGuide;
+			sourceTree = "<group>";
+		};
+		EC4000000000000A11CE0006 /* EchoShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EchoShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +248,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EC4000000000000A11CE0007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -230,6 +267,8 @@
 				9D8C7321306607710082FCFE /* EchoSafariExtension */,
 				9D8C7346306607950082FCFE /* EchoiMessageExtension */,
 				9D8C735F306607E60082FCFE /* EchoWidgetExtension */,
+				EC4000000000000A11CE0005 /* EchoLiveGuide */,
+				EC4000000000000A11CE0006 /* EchoShared */,
 				9D8C7343306607950082FCFE /* Frameworks */,
 				9D8C72CA3066025A0082FCFE /* Products */,
 				9D8C72FB306603D20082FCFE /* EchoExtension */,
@@ -247,6 +286,7 @@
 				9D8C7320306607710082FCFE /* EchoSafariExtension.appex */,
 				9D8C7342306607950082FCFE /* EchoiMessageExtension.appex */,
 				9D8C735A306607E60082FCFE /* EchoWidgetExtensionExtension.appex */,
+				EC4000000000000A11CE0000 /* EchoLiveGuide.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -301,9 +341,11 @@
 				9D8C7337306607710082FCFE /* PBXTargetDependency */,
 				9D8C7350306607960082FCFE /* PBXTargetDependency */,
 				9D8C736C306607E70082FCFE /* PBXTargetDependency */,
+				EC4000000000000A11CE0003 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9D8C72CB3066025A0082FCFE /* Echo */,
+				EC4000000000000A11CE0006 /* EchoShared */,
 			);
 			name = Echo;
 			packageProductDependencies = (
@@ -416,12 +458,36 @@
 			);
 			fileSystemSynchronizedGroups = (
 				9D8C735F306607E60082FCFE /* EchoWidgetExtension */,
+				EC4000000000000A11CE0006 /* EchoShared */,
 			);
 			name = EchoWidgetExtensionExtension;
 			packageProductDependencies = (
 			);
 			productName = EchoWidgetExtensionExtension;
 			productReference = 9D8C735A306607E60082FCFE /* EchoWidgetExtensionExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		EC4000000000000A11CE000A /* EchoLiveGuide */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC4000000000000A11CE000B /* Build configuration list for PBXNativeTarget "EchoLiveGuide" */;
+			buildPhases = (
+				EC4000000000000A11CE0008 /* Sources */,
+				EC4000000000000A11CE0007 /* Frameworks */,
+				EC4000000000000A11CE0009 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EC4000000000000A11CE0005 /* EchoLiveGuide */,
+				EC4000000000000A11CE0006 /* EchoShared */,
+			);
+			name = EchoLiveGuide;
+			packageProductDependencies = (
+			);
+			productName = EchoLiveGuide;
+			productReference = EC4000000000000A11CE0000 /* EchoLiveGuide.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -454,6 +520,9 @@
 					9D8C7359306607E60082FCFE = {
 						CreatedOnToolsVersion = 26.6;
 					};
+					EC4000000000000A11CE000A = {
+						CreatedOnToolsVersion = 26.6;
+					};
 				};
 			};
 			buildConfigurationList = 9D8C72C43066025A0082FCFE /* Build configuration list for PBXProject "Echo" */;
@@ -476,6 +545,7 @@
 				9D8C731F306607710082FCFE /* EchoSafariExtension */,
 				9D8C7341306607950082FCFE /* EchoiMessageExtension */,
 				9D8C7359306607E60082FCFE /* EchoWidgetExtensionExtension */,
+				EC4000000000000A11CE000A /* EchoLiveGuide */,
 			);
 		};
 /* End PBXProject section */
@@ -519,6 +589,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		9D8C7358306607E60082FCFE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC4000000000000A11CE0009 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -570,6 +647,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EC4000000000000A11CE0008 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -598,6 +682,11 @@
 			target = 9D8C7359306607E60082FCFE /* EchoWidgetExtensionExtension */;
 			targetProxy = 9D8C736B306607E70082FCFE /* PBXContainerItemProxy */;
 		};
+		EC4000000000000A11CE0003 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC4000000000000A11CE000A /* EchoLiveGuide */;
+			targetProxy = EC4000000000000A11CE0002 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -607,6 +696,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				AUTOMATION_APPLE_EVENTS = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphone*]" = Echo/EchoApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X6LZQ3FS36;
@@ -674,6 +764,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				AUTOMATION_APPLE_EVENTS = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphone*]" = Echo/EchoApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X6LZQ3FS36;
@@ -1154,6 +1245,66 @@
 			};
 			name = Release;
 		};
+		EC4000000000000A11CE000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EchoLiveGuide/EchoLiveGuide.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X6LZQ3FS36;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EchoLiveGuide/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Echo;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = phoronomicstudios.com.Echo.EchoLiveGuide;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EC4000000000000A11CE000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EchoLiveGuide/EchoLiveGuide.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X6LZQ3FS36;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EchoLiveGuide/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Echo;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = phoronomicstudios.com.Echo.EchoLiveGuide;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1216,6 +1367,15 @@
 			buildConfigurations = (
 				9D8C736F306607E70082FCFE /* Debug */,
 				9D8C7370306607E70082FCFE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC4000000000000A11CE000B /* Build configuration list for PBXNativeTarget "EchoLiveGuide" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC4000000000000A11CE000C /* Debug */,
+				EC4000000000000A11CE000D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

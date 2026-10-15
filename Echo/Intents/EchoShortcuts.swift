@@ -1,9 +1,49 @@
 import AppIntents
 
-// MARK: - Siri Shortcuts for Echo
+// MARK: - Siri phrases & Shortcuts actions
+// Testing: Shortcuts app → + → search "Echo". Siri phrases need a real device.
 
 struct EchoShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
+        AppShortcut(
+            intent: HeyEchoIntent(),
+            phrases: [
+                "Hey \(.applicationName)",
+                "Talk to \(.applicationName)",
+                "\(.applicationName), I need help"
+            ],
+            shortTitle: "Hey Echo",
+            systemImageName: "circle.hexagongrid.circle"
+        )
+        AppShortcut(
+            intent: AskEchoAboutLastScreenshotIntent(),
+            phrases: [
+                "Ask \(.applicationName) about my screenshot",
+                "Ask \(.applicationName) about my screen",
+                "\(.applicationName), what do I tap next"
+            ],
+            shortTitle: "Ask About Screenshot",
+            systemImageName: "camera.viewfinder"
+        )
+        AppShortcut(
+            intent: StartLiveGuideIntent(),
+            phrases: [
+                "Start \(.applicationName) Live Guide",
+                "\(.applicationName), watch my screen",
+                "\(.applicationName), walk me through this"
+            ],
+            shortTitle: "Live Guide",
+            systemImageName: "eye"
+        )
+        AppShortcut(
+            intent: OpenEchoAgentIntent(),
+            phrases: [
+                "Open \(.applicationName) Agent",
+                "Have \(.applicationName) do something"
+            ],
+            shortTitle: "Echo Agent",
+            systemImageName: "wand.and.stars"
+        )
         AppShortcut(
             intent: AskEchoIntent(),
             phrases: [
@@ -16,17 +56,3 @@ struct EchoShortcuts: AppShortcutsProvider {
         )
     }
 }
-
-/*
- ── Testing Siri Shortcuts ──────────────────────────────────────────────
- 1. Build and run on a real device (Shortcuts are not available in Simulator).
- 2. Open the Shortcuts app → tap + (New Shortcut) → search "Echo".
- 3. You should see "Ask Echo" in the list of Echo actions.
- 4. Add it, name it, then run it — Echo should open to the home screen.
- 5. To test with Siri: say "Ask Echo", "Open Echo", or "Get help from Echo".
-
- The `openAppWhenRun = true` flag ensures Echo launches automatically.
- In a future release, the intent can deep-link to AnalyzeView by setting
- `pendingImageData` on AppRouter before returning from `perform()`.
- ────────────────────────────────────────────────────────────────────────
- */

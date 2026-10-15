@@ -12,11 +12,18 @@ struct ImagePickerButton: View {
         PhotosPicker(selection: $selectedItem, matching: .images) {
             Group {
                 if let img = currentImage {
-                    Image(uiImage: img)
-                        .resizable()
-                        .scaledToFill()
+                    // A fixed-size container holds the filled image. Using scaledToFill()
+                    // directly let the image's oversized layout frame swallow taps meant
+                    // for the question box below (clipped() hides pixels, not hit areas).
+                    Color.clear
                         .frame(maxWidth: .infinity)
                         .frame(height: 220)
+                        .overlay {
+                            Image(uiImage: img)
+                                .resizable()
+                                .scaledToFill()
+                                .allowsHitTesting(false)
+                        }
                         .clipped()
                         .overlay(alignment: .bottomTrailing) {
                             replaceLabel
@@ -26,6 +33,7 @@ struct ImagePickerButton: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl))
+            .contentShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.xl))
         }
         .buttonStyle(.plain)
         .onChange(of: selectedItem) { _, item in

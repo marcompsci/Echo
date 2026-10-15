@@ -46,6 +46,13 @@ final class ResultViewModel {
         selectedAnnotationID = response.annotations.first { $0.label == label }?.id
     }
 
+    /// Highlights a step without toggling (used while Echo reads the guide aloud).
+    func focusStep(_ index: Int?) {
+        selectedStepIndex = index
+        guard let index else { selectedAnnotationID = nil; return }
+        selectedAnnotationID = response.annotations.first { $0.label == String(index + 1) }?.id
+    }
+
     var isAnnotationSelected: Bool { selectedAnnotationID != nil }
 
     func requestAction(_ action: ActionSuggestion) {

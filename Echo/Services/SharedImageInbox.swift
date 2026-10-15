@@ -6,7 +6,7 @@ import Foundation
 
 struct SharedImageInbox: Sendable {
     // Replace with your actual App Group identifier when provisioning.
-    static let appGroupID = "group.com.yourcompany.echo"
+    static let appGroupID = EchoAppGroup.id
     static let pendingImageKey = "pending_shared_image"
     static let pendingImageFilename = "pending_share.jpg"
 

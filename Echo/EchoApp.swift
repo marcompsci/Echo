@@ -28,6 +28,7 @@ struct EchoApp: App {
                     OnboardingView(onComplete: { hasSeenOnboarding = true })
                 }
             }
+            .task { EchoPresence.start() }
             .onOpenURL { url in
                 handleIncomingURL(url)
             }
@@ -36,6 +37,8 @@ struct EchoApp: App {
     }
 
     private func handleIncomingURL(_ url: URL) {
+        // echo://last-screenshot and echo://agent — Control Center / Action Button
+        if EchoLaunchCenter.shared.handle(url: url) { return }
         // echo://import — called by the future Share Extension
         guard url.scheme?.lowercased() == "echo",
               url.host?.lowercased() == "import" else { return }

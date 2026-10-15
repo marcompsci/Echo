@@ -6,7 +6,7 @@ import os.log
 final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.echo", category: "Extension")
-    private let appGroupID = "group.com.echo.extension"
+    private let appGroupID = "group.phoronomicstudios.com.Echo"
 
     func beginRequest(with context: NSExtensionContext) {
         guard

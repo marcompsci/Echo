@@ -5,6 +5,8 @@ struct AnnotationOverlayView: View {
     let annotations: [Annotation]
     let selectedAnnotationID: UUID?
     let onAnnotationTap: (Annotation) -> Void
+    /// Shows Echo's pointer gliding to the selected marker (Clicky-style).
+    var showsPointer: Bool = false
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -39,6 +41,22 @@ struct AnnotationOverlayView: View {
                         .animation(reduceMotion ? .none : .spring(duration: 0.25), value: isSelected)
                         .accessibilityLabel(annotationAccessibilityLabel(ann))
                         .accessibilityAddTraits(.isButton)
+                }
+
+                if showsPointer {
+                    let target = annotations.first { $0.id == selectedAnnotationID }
+                    let point: CGPoint = {
+                        guard let target else {
+                            return CGPoint(x: imageSize.width - 24, y: imageSize.height - 24)
+                        }
+                        let r = target.absoluteRect(in: imageSize)
+                        return CGPoint(x: r.midX + 14, y: r.maxY + 10)
+                    }()
+                    EchoPointer(isActive: target != nil)
+                        .position(x: imageOrigin.x + point.x, y: imageOrigin.y + point.y)
+                        .animation(reduceMotion ? .none : .spring(duration: 0.7, bounce: 0.25), value: selectedAnnotationID)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
             }
             .scaleEffect(scale)
@@ -155,6 +173,31 @@ struct AnnotationOverlayView: View {
         let heightRatio = containerSize.height / imageSize.height
         let ratio = min(widthRatio, heightRatio)
         return CGSize(width: imageSize.width * ratio, height: imageSize.height * ratio)
+    }
+}
+
+// MARK: - Echo pointer
+
+private struct EchoPointer: View {
+    let isActive: Bool
+    @State private var pulse = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.echoLavender.opacity(0.25))
+                .frame(width: 34, height: 34)
+                .scaleEffect(pulse ? 1.25 : 0.85)
+            Image(systemName: "cursorarrow")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(LinearGradient.echoAccent)
+                .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+                .rotationEffect(.degrees(-8))
+        }
+        .opacity(isActive ? 1 : 0.55)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true }
+        }
     }
 }
 

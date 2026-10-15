@@ -12,7 +12,10 @@ import SwiftUI
 struct EchoWidgetExtensionBundle: WidgetBundle {
     var body: some Widget {
         EchoWidgetExtension()
+        HeyEchoControl()
         EchoWidgetExtensionControl()
+        EchoAgentControl()
+        EchoLiveGuideControl()
         EchoWidgetExtensionLiveActivity()
     }
 }

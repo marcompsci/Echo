@@ -34,7 +34,7 @@ final class AnalyzeViewModel {
 
     init(
         guideService: any GuideService = EchoConfig.makeGuideService(),
-        speechService: any SpeechServiceProtocol = MockSpeechService()
+        speechService: any SpeechServiceProtocol = LiveSpeechService()
     ) {
         self.guideService = guideService
         self.speechService = speechService
@@ -92,10 +92,11 @@ final class AnalyzeViewModel {
                 return
             }
             do {
-                let text = try await self.speechService.transcribeFromMicrophone()
+                let raw = try await self.speechService.transcribeFromMicrophone()
+                let text = await AppleIntelligence.cleanUpTranscript(raw)
                 if !Task.isCancelled {
                     self.voiceTranscript = text
-                    if self.question.isEmpty { self.question = text }
+                    self.question = text
                 }
             } catch {
                 if !Task.isCancelled {
@@ -106,12 +107,20 @@ final class AnalyzeViewModel {
         }
     }
 
+    /// Called when "hold to speak" is released: keep the task alive so the
+    /// final transcript arrives, just stop listening.
     func stopVoiceInput() {
+        speechService.finishTranscription()
+        isRecording = false
+    }
+
+    func cancelVoiceInput() {
         speechService.cancelTranscription()
         transcriptionTask?.cancel()
         transcriptionTask = nil
         isRecording = false
     }
+
 
     // MARK: - Analysis
 

@@ -10,6 +10,10 @@ struct SettingsView: View {
     @State private var vm = SettingsViewModel()
     @AppStorage("imageRetentionPolicy") private var retentionRaw: String = EchoSession.ImageRetentionPolicy.noSave.rawValue
     @AppStorage("echoPetEnabled")       private var petEnabled = false
+    @AppStorage(GuideEngine.storageKey)  private var engineRaw: String = GuideEngine.automatic.rawValue
+    @AppStorage(GuideNarrator.autoSpeakKey) private var speakAloud = true
+    @AppStorage(UserProfile.nameKey) private var userName = ""
+    @AppStorage(EchoPresence.enabledKey) private var presenceEnabled = false
 
     private var retentionPolicy: Binding<EchoSession.ImageRetentionPolicy> {
         Binding(
@@ -24,6 +28,7 @@ struct SettingsView: View {
                 Color.echoBackground.ignoresSafeArea()
                 List {
                     accountSection
+                    intelligenceSection
                     petSection
                     dataSection
                     permissionsSection
@@ -69,15 +74,50 @@ struct SettingsView: View {
 
     // MARK: - Account section
 
+    private var intelligenceSection: some View {
+        Section {
+            Picker("Guide engine", selection: $engineRaw) {
+                ForEach(GuideEngine.allCases) { engine in
+                    Text(engine.title).tag(engine.rawValue)
+                }
+            }
+            Text((GuideEngine(rawValue: engineRaw) ?? .automatic).detail)
+                .font(.echoFootnote)
+                .foregroundStyle(.echoTextSecondary)
+
+            Toggle("Read guides aloud", isOn: $speakAloud)
+
+            NavigationLink {
+                HeyEchoSetupView()
+            } label: {
+                Label("Set up Hey Echo", systemImage: "waveform.circle")
+            }
+
+            Label {
+                Text(AppleIntelligence.statusDescription)
+                    .font(.echoFootnote)
+                    .foregroundStyle(.echoTextSecondary)
+            } icon: {
+                Image(systemName: AppleIntelligence.isAvailable ? "apple.intelligence" : "exclamationmark.circle")
+                    .foregroundStyle(.echoLavender)
+            }
+        } header: {
+            Text("Apple Intelligence")
+        } footer: {
+            Text("Echo Agent plans tasks and cleans up voice questions with Apple Intelligence on-device when it's available.")
+        }
+    }
+
     private var accountSection: some View {
         Section("Account") {
-            HStack {
-                Label("Echo account", systemImage: "person.circle")
-                    .foregroundStyle(.echoTextPrimary)
-                Spacer()
-                Text("Coming soon")
-                    .font(.echoFootnote)
-                    .foregroundStyle(.echoTextTertiary)
+            TextField("Your name (Echo greets you with it)", text: $userName)
+                .textContentType(.givenName)
+            ConnectAccountsView()
+                .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+            NavigationLink {
+                FeedbackView()
+            } label: {
+                Label("Send Feedback", systemImage: "bubble.left.and.text.bubble.right")
             }
         }
         .listRowBackground(Color.echoSurface)
@@ -115,7 +155,23 @@ struct SettingsView: View {
                 }
             }
 
-            Text("Your pet lives on the home screen. Tap it to interact, hold to feed or customize, and drag it out of the way when needed.")
+            if petEnabled {
+                Toggle(isOn: $presenceEnabled) {
+                    Label("Echo on Lock Screen & Dynamic Island", systemImage: "platter.filled.top.iphone")
+                        .foregroundStyle(.echoTextPrimary)
+                }
+                .tint(Color.echoLavender)
+                .onChange(of: presenceEnabled) { _, on in
+                    if on { EchoPresence.start() } else { EchoPresence.stop() }
+                }
+                if presenceEnabled {
+                    Text("Echo's orb stays in the Dynamic Island and on your Lock Screen, shows what Echo is doing, and opens Echo listening when you tap it. Turn it off here anytime.")
+                        .font(.echoCaption)
+                        .foregroundStyle(.echoTextTertiary)
+                }
+            }
+
+            Text("Your pet lives on the home screen. Tap it to talk to Echo, hold to feed or customize, and drag it out of the way when needed.")
                 .font(.echoCaption)
                 .foregroundStyle(.echoTextTertiary)
         } header: {

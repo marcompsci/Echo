@@ -18,7 +18,14 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: EchoSpacing.lg) {
                     headerSection
+                    heyEchoButton
                     agentHeroCard
+                    QuickActionCard(
+                        systemImage: "eye",
+                        title: "Live Guide",
+                        subtitle: "Echo watches your screen and talks you through it",
+                        isPrimary: true
+                    ) { router.navigateToLiveGuide() }
                     Divider().background(Color.echoSeparator).padding(.horizontal, EchoSpacing.lg)
                     guideSection
                     recentSection
@@ -138,6 +145,30 @@ struct HomeView: View {
     }
 
     // MARK: - Guide section (secondary)
+
+    private var heyEchoButton: some View {
+        Button { router.showHeyEcho = true } label: {
+            HStack(spacing: EchoSpacing.md) {
+                EchoOrbView(size: 64)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Hey Echo")
+                        .font(.echoHeadline)
+                        .foregroundStyle(.echoTextPrimary)
+                    Text("Tap and talk — ask, get help, or have Echo do it")
+                        .font(.echoCaption)
+                        .foregroundStyle(.echoTextSecondary)
+                }
+                Spacer()
+                Image(systemName: "mic.fill")
+                    .foregroundStyle(.echoLavender)
+            }
+            .padding(EchoSpacing.sm)
+            .background(Color.echoSurface)
+            .clipShape(RoundedRectangle(cornerRadius: EchoSpacing.Corner.lg))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Hey Echo. Tap and talk.")
+    }
 
     private var guideSection: some View {
         VStack(alignment: .leading, spacing: EchoSpacing.sm) {

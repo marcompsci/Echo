@@ -10,6 +10,8 @@ struct ResultView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var vm: ResultViewModel
     @State private var showImageFullscreen = false
+    @State private var narrator = GuideNarrator()
+    @AppStorage(GuideNarrator.autoSpeakKey) private var speakAloud = true
 
     init(session: EchoSession, response: GuideResponse, imageData: Data?) {
         self.session = session
@@ -32,6 +34,23 @@ struct ResultView: View {
                 .padding(.horizontal, EchoSpacing.md)
                 .padding(.top, EchoSpacing.md)
                 .padding(.bottom, EchoSpacing.xxxl)
+            }
+        }
+        .onAppear { if speakAloud { narrator.speak(response) } }
+        .onDisappear { narrator.stop() }
+        .onChange(of: narrator.currentStepIndex) { _, index in
+            withAnimation { vm.focusStep(index) }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    if narrator.isSpeaking { narrator.stop() } else { narrator.speak(response) }
+                } label: {
+                    Image(systemName: narrator.isSpeaking ? "stop.circle.fill" : "speaker.wave.2.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.echoLavender)
+                }
+                .accessibilityLabel(narrator.isSpeaking ? "Stop reading" : "Walk me through it")
             }
         }
         .navigationTitle("Echo's Guide")
@@ -87,7 +106,8 @@ struct ResultView: View {
                         image: image,
                         annotations: response.annotations,
                         selectedAnnotationID: vm.selectedAnnotationID,
-                        onAnnotationTap: { vm.selectAnnotation($0) }
+                        onAnnotationTap: { vm.selectAnnotation($0) },
+                        showsPointer: true
                     )
                     .frame(height: 300)
                     .clipped()

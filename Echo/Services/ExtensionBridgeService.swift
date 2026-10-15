@@ -33,7 +33,7 @@ final class ExtensionBridgeService: ObservableObject {
         }
     }
 
-    private let appGroupID = "group.com.echo.extension"
+    private let appGroupID = EchoAppGroup.id
     private var defaults: UserDefaults?
     private let nlService = NLAnalysisService.shared
     var onSnapshotReceived: ((ElementSnapshot) -> Void)?

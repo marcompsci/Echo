@@ -1,4 +1,5 @@
 import Foundation
+import Contacts
 
 // MARK: - Live agent service — dispatches to real iOS APIs
 
@@ -10,8 +11,15 @@ struct LiveAgentService: AgentService {
 
     // On-device NLP via EchoAIProcessor (CoreML + NaturalLanguage + Vision).
     // Replace with a backend call in LiveGuideService once an API is available.
+    // Apple Intelligence plans the task on-device when available;
+    // otherwise Echo falls back to its simple keyword parser.
     func analyze(request: AgentRequest) async throws -> AgentPlan {
-        await EchoAIProcessor().processUserCommand(request.text)
+        if AppleIntelligence.isAvailable {
+            if let plan = try? await OnDeviceAgentPlanner().plan(for: request) {
+                return plan
+            }
+        }
+        return await EchoAIProcessor().processUserCommand(request.text)
     }
 
     // Execute dispatches each action to the appropriate native agent.
@@ -68,7 +76,52 @@ struct LiveAgentService: AgentService {
         // Notes (URL scheme handoff — no public Notes API on iOS)
         case .createNote(let title, let body):
             await openNotesURL(title: title, body: body)
+
+        // Calendar
+        case .createEvent(let title, let start, let end):
+            try await reminders.createEvent(title: title, start: start, end: end)
+
+        // Hand-offs (iOS never lets an app send/call for you; the person taps)
+        case .sendMessage(let recipient, let body):
+            let address = await resolvePhone(recipient) ?? ""
+            try await open("sms:\(address)&body=\(Self.encode(body))")
+        case .sendEmail(let to, let subject, let body):
+            try await open("mailto:\(to)?subject=\(Self.encode(subject))&body=\(Self.encode(body))")
+        case .callPhone(let recipient):
+            guard let number = await resolvePhone(recipient) else {
+                throw EchoAgentError.notFound("A phone number for \(recipient)")
+            }
+            try await open("tel://\(number)")
+        case .getDirections(let destination):
+            try await open("maps://?daddr=\(Self.encode(destination))")
+        case .runShortcut(let name):
+            try await open("shortcuts://run-shortcut?name=\(Self.encode(name))")
+        case .openWebsite(let url):
+            let full = url.lowercased().hasPrefix("http") ? url : "https://\(url)"
+            try await open(full)
         }
+    }
+
+    // MARK: - Hand-off helpers
+
+    private static func encode(_ text: String) -> String {
+        text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed.subtracting(CharacterSet(charactersIn: "&=?+"))) ?? ""
+    }
+
+    @MainActor
+    private func open(_ string: String) async throws {
+        guard let url = URL(string: string) else { throw EchoAgentError.invalidInput(string) }
+        let ok = await UIApplication.shared.open(url)
+        if !ok { throw EchoAgentError.executionFailed("Couldn't open the app for this step.") }
+    }
+
+    /// A phone number as typed, or the first number of a matching contact.
+    private func resolvePhone(_ recipient: String) async -> String? {
+        let digits = recipient.filter { $0.isNumber || $0 == "+" }
+        if digits.count >= 7 { return digits }
+        guard let match = try? await contacts.search(query: recipient).first,
+              let number = match.phoneNumbers.first?.value.stringValue else { return nil }
+        return number.filter { $0.isNumber || $0 == "+" }
     }
 
     @MainActor

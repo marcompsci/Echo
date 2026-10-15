@@ -7,6 +7,8 @@ enum EchoRoute: Hashable {
     case analyze
     case result
     case agent
+    case liveGuide
+    case heyEchoSetup
 }
 
 @Observable
@@ -21,6 +23,11 @@ final class AppRouter {
 
     // Modal sheets
     var showSettings = false
+    var showHeyEcho = false
+    /// Spoken before Hey Echo starts listening (e.g. when you tap the pet).
+    var heyEchoGreeting: String? = nil
+    /// Goal handed to Live Guide (e.g. from Hey Echo).
+    var pendingLiveGoal: String? = nil
 
     func navigateToAnalyze(imageData: Data) {
         pendingImageData = imageData
@@ -35,6 +42,10 @@ final class AppRouter {
 
     func navigateToAgent() {
         path.append(EchoRoute.agent)
+    }
+
+    func navigateToLiveGuide() {
+        path.append(EchoRoute.liveGuide)
     }
 
     func popToHome() {

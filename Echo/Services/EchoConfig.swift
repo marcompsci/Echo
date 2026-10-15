@@ -23,7 +23,8 @@ enum EchoConfig {
 
     /// Real Claude-powered guides once configured; sample data until then.
     static func makeGuideService() -> any GuideService {
-        if isBackendConfigured { return LiveGuideService() }
-        return MockGuideService()
+        let cloud: (any GuideService)? = isBackendConfigured ? LiveGuideService() : nil
+        if cloud == nil && !AppleIntelligence.isAvailable { return MockGuideService() }
+        return HybridGuideService(cloud: cloud)
     }
 }

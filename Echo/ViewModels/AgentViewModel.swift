@@ -40,7 +40,7 @@ final class AgentViewModel {
 
     init(
         service: any AgentService = LiveAgentService(),
-        speechService: any SpeechServiceProtocol = MockSpeechService()
+        speechService: any SpeechServiceProtocol = LiveSpeechService()
     ) {
         self.service = service
         self.speechService = speechService
@@ -105,7 +105,8 @@ final class AgentViewModel {
                 return
             }
             do {
-                let text = try await self.speechService.transcribeFromMicrophone()
+                let raw = try await self.speechService.transcribeFromMicrophone()
+                let text = await AppleIntelligence.cleanUpTranscript(raw)
                 if !Task.isCancelled {
                     self.commandText = text
                 }
@@ -115,9 +116,7 @@ final class AgentViewModel {
     }
 
     func stopVoice() {
-        speechService.cancelTranscription()
-        voiceTask?.cancel()
-        voiceTask = nil
+        speechService.finishTranscription()
         isRecording = false
     }
 

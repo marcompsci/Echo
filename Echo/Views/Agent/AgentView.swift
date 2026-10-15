@@ -8,9 +8,9 @@ struct AgentView: View {
 
     // Quick command suggestions
     private let suggestions: [(icon: String, text: String)] = [
-        ("bell.badge.plus",                "Remind me to pay my phone bill Friday"),
+        ("bell.badge",                "Remind me to pay my phone bill Friday"),
         ("photo.on.rectangle.angled",      "Create an album called Receipts"),
-        ("bell.badge.plus",                "Remind me to follow up tomorrow"),
+        ("bell.badge",                "Remind me to follow up tomorrow"),
         ("note.text.badge.plus",           "Save this note: "),
         ("folder.badge.plus",              "Create a folder called Projects"),
         ("photo.on.rectangle",             "List my largest videos")
@@ -256,6 +256,9 @@ struct AgentView: View {
                         .frame(minHeight: 44, maxHeight: 120)
                         .focused($inputFocused)
                 }
+                // Size to the text, not the screen: the background shape alone
+                // would otherwise stretch the input over the suggestions.
+                .fixedSize(horizontal: false, vertical: true)
 
                 // Run button
                 Button {

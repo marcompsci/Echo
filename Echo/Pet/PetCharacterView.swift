@@ -11,54 +11,21 @@ struct PetCharacterView: View {
     let isExcited: Bool
     let size: CGFloat
 
+    // Echo's pet is now a glowing orb. Body color tints it; mood sets how
+    // lively it is; it morphs whenever Echo talks or listens.
     var body: some View {
-        ZStack {
-            // Drop shadow
-            Ellipse()
-                .fill(bodyColor.shadowColor)
-                .frame(width: size * 0.58, height: size * 0.09)
-                .blur(radius: 4)
-                .offset(y: size * 0.43)
-
-            // Halo behind body
-            if accessory == .halo { haloView.offset(y: -size * 0.41) }
-
-            // Ear bumps (drawn before body so body overlaps the base)
-            HStack(spacing: size * 0.40) { earView; earView }
-                .offset(y: -size * 0.28)
-
-            // Body
-            RoundedRectangle(cornerRadius: size * 0.30)
-                .fill(LinearGradient(
-                    colors: [bodyColor.color.opacity(0.88), bodyColor.color],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ))
-                .frame(width: size * 0.80, height: size * 0.66)
-                .overlay(
-                    RoundedRectangle(cornerRadius: size * 0.30)
-                        .strokeBorder(Color.white.opacity(0.22), lineWidth: 1.5)
-                )
-                .offset(y: size * 0.04)
-                .overlay(faceView.offset(y: size * 0.04))
-
-            // Front accessories
-            if accessory != .halo && accessory != .none {
-                frontAccessoryView.offset(y: -size * 0.44)
-            }
-
-            // Cheek blush
-            if mood == .happy || mood == .excited {
-                HStack(spacing: size * 0.40) {
-                    cheek; cheek
-                }
-                .offset(y: size * 0.10)
-            }
-        }
-        .frame(width: size, height: size)
-        .scaleEffect(isExcited ? 1.10 : 1.0)
+        EchoOrbView(
+            size: size,
+            tint: bodyColor.color,
+            secondary: .echoMint,
+            calmness: mood == .sleepy ? 2.2 : (mood == .excited ? 0.6 : 1.0),
+            bodyOpacity: 0.55   // glassy: you can see through the body
+        )
+        .scaleEffect(isExcited ? 1.12 : 1.0)
         .animation(.spring(duration: 0.25, bounce: 0.6), value: isExcited)
     }
 
+    // Legacy character pieces (kept for reference; no longer drawn).
     // MARK: - Ear
 
     private var earView: some View {

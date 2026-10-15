@@ -1,13 +1,20 @@
 import Foundation
 import Speech
 import AVFoundation
+import os
 
 // MARK: - Protocol
 
 protocol SpeechServiceProtocol: Sendable {
     func requestPermissions() async -> Bool
     func transcribeFromMicrophone() async throws -> String
+    /// Stop listening and deliver what was heard (release of "hold to speak").
+    func finishTranscription()
     func cancelTranscription()
+}
+
+extension SpeechServiceProtocol {
+    func finishTranscription() { cancelTranscription() }
 }
 
 // MARK: - Mock (default in MVP)
@@ -29,6 +36,7 @@ final class LiveSpeechService: SpeechServiceProtocol, @unchecked Sendable {
     private let lock = NSLock()
     private var recognitionTask: SFSpeechRecognitionTask?
     private var audioEngine: AVAudioEngine?
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
 
     func requestPermissions() async -> Bool {
         let speechGranted = await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
@@ -56,26 +64,35 @@ final class LiveSpeechService: SpeechServiceProtocol, @unchecked Sendable {
 
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = false
+        if recognizer.supportsOnDeviceRecognition {
+            request.requiresOnDeviceRecognition = true   // private: audio stays on the iPhone
+        }
+        lock.lock(); recognitionRequest = request; lock.unlock()
 
         let engine = AVAudioEngine()
         lock.lock(); audioEngine = engine; lock.unlock()
 
-        let inputNode = engine.inputNode
-        let format = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
-            request.append(buffer)
-        }
+        SpeechTaps.install(on: engine.inputNode, feeding: request)
+        EchoVoiceActivity.shared.setMode(.listening)
         try engine.start()
 
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { cont in
-                let task = recognizer.recognitionTask(with: request) { result, error in
-                    if let result, result.isFinal {
-                        self.cleanup(engine: engine, session: audioSession)
-                        cont.resume(returning: result.bestTranscription.formattedString)
-                    } else if let error {
-                        self.cleanup(engine: engine, session: audioSession)
-                        cont.resume(throwing: error)
+                let resumed = OSAllocatedUnfairLock(initialState: false)
+                let task = SpeechTaps.recognize(with: recognizer, request: request) { text, isFinal, error in
+                    let first = resumed.withLock { done -> Bool in
+                        if done { return false }
+                        if isFinal || error != nil { done = true; return true }
+                        return false
+                    }
+                    guard first else { return }
+                    SpeechTaps.stop(engine: engine)
+                    EchoVoiceActivity.shared.setMode(.idle)
+                    try? AVAudioSession.sharedInstance().setActive(false)
+                    if isFinal, let text {
+                        cont.resume(returning: text)
+                    } else {
+                        cont.resume(throwing: error ?? CancellationError())
                     }
                 }
                 self.lock.lock(); self.recognitionTask = task; self.lock.unlock()
@@ -85,8 +102,22 @@ final class LiveSpeechService: SpeechServiceProtocol, @unchecked Sendable {
         }
     }
 
+    /// Ends the audio stream so the recognizer returns its final transcript.
+    func finishTranscription() {
+        lock.lock()
+        let request = recognitionRequest
+        let engine = audioEngine
+        recognitionRequest = nil
+        audioEngine = nil
+        lock.unlock()
+        engine?.stop()
+        engine?.inputNode.removeTap(onBus: 0)
+        request?.endAudio()
+    }
+
     func cancelTranscription() {
         lock.lock()
+        recognitionRequest = nil
         recognitionTask?.cancel()
         recognitionTask = nil
         let engine = audioEngine
@@ -98,6 +129,7 @@ final class LiveSpeechService: SpeechServiceProtocol, @unchecked Sendable {
     }
 
     private func cleanup(engine: AVAudioEngine, session: AVAudioSession) {
+        EchoVoiceActivity.shared.setMode(.idle)
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         try? session.setActive(false)
