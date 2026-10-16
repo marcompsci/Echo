@@ -15,6 +15,7 @@ struct EchoSplashView: View {
         ZStack {
             Color("LaunchBackground").ignoresSafeArea()
             Image("LaunchMark")
+                .interpolation(.none)
                 .offset(y: hop ? -14 : 0)
                 .scaleEffect(leaving ? 1.08 : 1)
                 .accessibilityLabel("Echo")
